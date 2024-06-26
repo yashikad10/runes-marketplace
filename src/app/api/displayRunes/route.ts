@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     }
 
     const user = await UserCollection.findOne({ ordinal_address }).exec();
-
+    console.log(user, "-----------------user inside route display rune");
     if (!user) {
       return NextResponse.json(
         { message: "No user found with the given ordinal address" },

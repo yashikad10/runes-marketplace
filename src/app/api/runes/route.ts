@@ -5,9 +5,7 @@ import { aggregateRuneAmounts, getRunesUtxos } from "@/utils/runes";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  
   try {
-    
     const data = await req.json();
     const { cardinal_address, ordinal_address, cardinal_pubkey, wallet } = data;
 
@@ -18,6 +16,17 @@ export async function POST(req: NextRequest) {
       wallet,
       runes: [],
     };
+    console.log(data, "---------------------user runes");
+    const existingUser = await UserCollection.findOne({
+      $or: [{ cardinal_address }, { ordinal_address }],
+    });
+
+    if (!existingUser) {
+      await UserCollection.create(dataToSave);
+      console.log("User data saved:", dataToSave);
+    } else {
+      console.log("User data already exists, not saving again.");
+    }
 
     const runesUtxos = await getRunesUtxos(ordinal_address);
 
@@ -44,6 +53,8 @@ export async function POST(req: NextRequest) {
           divisibility: number;
           symbol: string;
         };
+        console.log({ runeValue });
+
         return {
           name: key,
           amount: runeValue.amount,
@@ -57,15 +68,25 @@ export async function POST(req: NextRequest) {
 
     console.log(allRuneUtxo);
 
-    await UtxoCollection.insertMany(allRuneUtxo);
-    console.log(`Stored ${allRuneUtxo.length} UTXOs in UtxoCollection.`);
+    for (const utxo of allRuneUtxo) {
+      const existingUtxo = await UtxoCollection.findOne({
+        txid: utxo.txid,
+        vout: utxo.vout,
+      });
 
-    // const updateResult = await UserCollection.updateMany(
-    //   {},
-    //   { $set: { runes: runesDataToSave } } // Set the runes field to the new data
-    // );
+      if (!existingUtxo) {
+        await UtxoCollection.create(utxo);
+        console.log("UTXO data saved:", utxo);
+      } else {
+        console.log("UTXO data already exists, not saving again.");
+      }
+    }
+    const updateResult = await UserCollection.updateMany(
+      {},
+      { $set: { runes: runesDataToSave } } // Set the runes field to the new data
+    );
 
-    // console.log("Document updated:", updateResult);
+    console.log("Document updated:", updateResult);
 
     return NextResponse.json({ message: "done" });
   } catch (err: any) {

@@ -57,9 +57,9 @@ const WalletButton = () => {
           }
         });
 
-        console.log(response.data);
+        console.log(response,"rune user data");
       } catch (error) {
-        console.error('Error uploading image:', error);
+        console.error('Error :', error);
       }
     };
 

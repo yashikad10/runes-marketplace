@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Runes from "@/views/Runes";
 import { getRunesData } from "@/apiHelper/getRunesData";
+import { useWalletAddress } from "bitcoin-wallet-adapter";
 
 type Rune = {
   rune_name: string;
@@ -19,19 +20,32 @@ type User = {
 
 const RunesData = () => {
   const [runesData, setRunesData] = useState<User | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string>("");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const walletDetails=useWalletAddress();
 
-  const ordinalAddress =
-    "bc1pa3j3uzypawhrptwpaqk0z7m0z06h3ljyd2srp97gt6dw09emvrwsn826r4"; 
+  console.log(walletDetails?.ordinal_address,"---------------wallet details")
+
+  // const ordinalAddress =
+  //   "bc1psghjrvpu9l7k55k2upfyj42nt8wjvm8gqedytvrvy8hqzt8lv0ys6jnp39"; 
 
   const fetchData = async () => {
-    await getRunesData(ordinalAddress, setRunesData, setErrorMessage);
+    try {
+      if (walletDetails && walletDetails.ordinal_address) {
+        const response = await getRunesData(walletDetails.ordinal_address);
+        console.log(response,"--------------------response bc1p")
+        setRunesData(response?.data)
+      }else{
+        console.log("error-------------",walletDetails?.ordinal_address)
+      }
+    } catch (error) {
+      console.log("-------------catch error",walletDetails?.ordinal_address)
+    }
   };
 
+  
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [walletDetails]);
 
   const toggleExpand = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -52,21 +66,6 @@ const RunesData = () => {
                   <p className="text-sm text-gray-400">Price: {rune.rune_amount}</p>
                 </div>
 
-                {/* <svg
-                  className={`w-6 h-6 ${
-                    expandedIndex === index ? "transform rotate-180" : ""
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg> */}
               </div>
 
               {expandedIndex === index && (

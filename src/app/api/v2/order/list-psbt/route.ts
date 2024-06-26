@@ -49,6 +49,7 @@ async function processRuneItem(
     utxo_id,
   });
   console.log(runeItem, "runeItem");
+  
   if (!runeItem) throw new Error("Item hasn't been added to our DB");
   
   const taprootAddress =
@@ -113,6 +114,7 @@ export async function POST(
   console.log("***** CREATE UNSIGNED PSBT API CALLED *****");
   try {
     const body: OrderInput = await req.json();
+    console.log(body,"Req body")
     const missingFields = validateRequest(req, body);
     if (missingFields.length > 0) {
       return NextResponse.json(
@@ -123,6 +125,15 @@ export async function POST(
         { status: 400 }
       );
     }
+
+    const utxoData = await UtxoCollection.findOne({ utxo_id: body.utxo_id });
+    if (!utxoData) {
+      return NextResponse.json(
+        { ok: false, message: 'UTXO not found' },
+        { status: 404 }
+      );
+    }
+    console.log(utxoData,"utxoData")
 
     const { unsignedPsbtBase64, tap_internal_key } = await processRuneItem(
       body.utxo_id,
@@ -140,6 +151,7 @@ export async function POST(
       unsigned_psbt_base64: unsignedPsbtBase64,
       tap_internal_key,
       message: "Success",
+      utxoData
     });
   } catch (error: any) {
     console.log(error, "error");
