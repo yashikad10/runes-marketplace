@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
 import axios from "axios";
 import { useWalletAddress, useSignTx } from "bitcoin-wallet-adapter";
-
 const Runes = ({ rune }: any) => {
   const [expandedRuneDetails, setExpandedRuneDetails] = useState<any>(null);
   const [psbtData, setPsbtData] = useState<any>(null);
@@ -12,6 +11,7 @@ const Runes = ({ rune }: any) => {
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<string>("");
   const [action, setAction] = useState<string>("dummy");
   const [loading, setLoading] = useState<boolean>();
+  const [signedPsbtBase64, setSignedPsbtBase64]= useState<string>("");
 
   const { loading: signLoading, result, error, signTx: sign } = useSignTx();
   const walletDetails = useWalletAddress();
@@ -35,6 +35,7 @@ const Runes = ({ rune }: any) => {
       action: "sell",
       inputs,
     };
+    
     // console.log(options, "OPTIONS");
 
     await sign(options);
@@ -44,6 +45,8 @@ const Runes = ({ rune }: any) => {
     // Handling Wallet Sign Results/Errors
     if (result) {
       // Handle successful result from wallet sign
+      setSignedPsbtBase64(result);
+      handleListing(result);
       console.log("Sign Result:", result);
     }
     if (error) {
@@ -53,6 +56,31 @@ const Runes = ({ rune }: any) => {
 
     setLoading(false);
   }, [result, error]);
+
+  const handleListing = async (signedPsbtBase64: string) => {
+    if (!psbtData || !walletDetails) return;
+
+    const orderInput = {
+      ...psbtData,
+      signed_listing_psbt_base64: signedPsbtBase64,
+      maker_fee_bp: psbtData.maker_fee_bp,
+          seller_ord_address: psbtData.receive_address,
+          seller_receive_address: psbtData.receive_address,
+          price: psbtData.price,
+          tap_internal_key: walletDetails.ordinal_pubkey,
+          unsigned_listing_psbt_base64: psbtData.unsigned_psbt_base64,
+    };
+
+    console.log(orderInput,"orderInput------")
+
+
+    try {
+      const response = await axios.post("/api/v2/order/list-item", orderInput);
+      console.log("List Item Response:", response.data);
+    } catch (error: any) {
+      console.error("Error posting list item:", error);
+    }
+  };
 
 
   const toggleExpand = async (runeName: string) => {
@@ -227,10 +255,10 @@ const Runes = ({ rune }: any) => {
             <p className="p-2">
               Public Key:
               {
-                "0335d79181497c88763d437a3f094aa0f7b2e1e2e25e34a7bf8dec7c422761f545"
+                walletDetails?.ordinal_pubkey
               }
             </p>
-            <p className="p-2">Wallet: {"Leather"}</p>
+            <p className="p-2">Wallet: {walletDetails?.wallet}</p>
             <p className="p-2">Price: {psbtData.price}</p>
           </div>
         </div>

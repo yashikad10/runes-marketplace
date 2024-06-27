@@ -2,8 +2,8 @@ import * as bitcoin from "bitcoinjs-lib";
 import { AssetMap } from "../allRunes";
 
 export interface AddressTxsUtxo {
-  location: any;
-  offset: any;
+  location?: any;
+  offset?: any;
   ordinal_address: string;
   utxo_id: string;
   rune: AssetMap;
