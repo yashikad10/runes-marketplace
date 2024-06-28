@@ -9,14 +9,21 @@ const RuneListPage = () => {
   const runeList = async () => {
     try {
       const res = await getRunesList();
-      setList(res?.data.data)
+      const dataArray = res?.data?.data;
+
+      // Check if dataArray is defined and is an array
+      if (Array.isArray(dataArray)) {
+        setList(dataArray);
+      } else {
+        console.error("Data is not an array or is undefined");
+      }
+      // setList(res?.data.data)
       console.log(res, "res-----");
     } catch (error) {}
   };
 
   useEffect(() => {
     runeList();
-    
   }, []);
 
   return (

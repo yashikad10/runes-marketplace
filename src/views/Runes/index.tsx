@@ -22,15 +22,15 @@ const Runes = ({ rune }: any) => {
     }
     let inputs = [];
     inputs.push({
-      address: walletDetails.cardinal_address,
-      publickey: walletDetails.cardinal_pubkey,
-      sighash: 1,
+      address: walletDetails.ordinal_address,
+      publickey: walletDetails.ordinal_pubkey,
+      sighash: 131,
       index: [0],
     });
 
     const options: any = {
       psbt: unsignedPsbtBase64,
-      network: "Mainnet",
+      network: process.env.NEXT_PUBLIC_NETWORK || "Mainnet",
       action: "sell",
       inputs,
     };
@@ -224,7 +224,7 @@ const Runes = ({ rune }: any) => {
                         runeDetail.ordinal_address,
                         item.amount,
                         item.divisibility,
-                        "0335d79181497c88763d437a3f094aa0f7b2e1e2e25e34a7bf8dec7c422761f545",
+                        "0340bcde6e4978ad224aff48503ad05dc120a21db83b353b1baeaed2a4c10221be",
                         "Leather",
                         10
                       )

@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   try {
      await dbConnect();
 
-     const data= await UtxoCollection.find()
+     const data= await UtxoCollection.find({listed: true})
      .select("listed_price runes.name runes.amount runes.divisibility ")
 
      console.log(data,"data*******")

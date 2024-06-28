@@ -8,6 +8,7 @@ import UtxoCollection, { Utxo } from "@/models/UtxoCollection";
 import dbConnect from "@/lib/dbConnect";
 import * as bitcoin from "bitcoinjs-lib";
 import secp256k1 from "@bitcoinerlab/secp256k1";
+import { testnet } from "bitcoinjs-lib/src/networks";
 bitcoin.initEccLib(secp256k1);
 
 interface OrderInput {
@@ -41,7 +42,7 @@ async function processRuneItem(
   wallet: string,
   maker_fee_bp?: number
 ) {
-  let psbt = new bitcoin.Psbt({ network: undefined });
+  let psbt = new bitcoin.Psbt({ network: (process.env.NEXT_PUBLIC_NETWORK ?testnet: undefined) });
   
   await dbConnect();
 
@@ -53,7 +54,7 @@ async function processRuneItem(
   if (!runeItem) throw new Error("Item hasn't been added to our DB");
   
   const taprootAddress =
-    runeItem && runeItem?.ordinal_address && runeItem?.ordinal_address.startsWith("bc1p");
+    runeItem && runeItem?.ordinal_address && runeItem?.ordinal_address.startsWith("tb1p");
   if (runeItem.ordinal_address && runeItem.utxo_id && runeItem.value) {
     const [ordinalUtxoTxId, ordinalUtxoVout] = runeItem.utxo_id.split(":");
     // Define the input for the PSBT

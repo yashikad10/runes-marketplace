@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       console.log("adding final script witness -> ", orderInput.signed_listing_psbt_base64);
 
       const psbt = addFinalScriptWitness(orderInput.signed_listing_psbt_base64);
-      if (orderInput.seller_receive_address.startsWith("bc1p")) {
+      if (orderInput.seller_receive_address.startsWith("bc1p") || orderInput.seller_receive_address.startsWith("tb1p")) {
         const validSig = verifySignature(psbt);
         if (!validSig) {
           return NextResponse.json(

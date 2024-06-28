@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
       runes: [],
     };
     console.log(data, "---------------------user runes");
+    await dbConnect()
     const existingUser = await UserCollection.findOne({
       $or: [{ cardinal_address }, { ordinal_address }],
     });
