@@ -39,6 +39,7 @@ export async function POST(req: NextRequest) {
     const runesDataToSave = aggregateRuneAmount.map((rune) => ({
       rune_name: rune.name,
       rune_amount: rune.amount,
+      divisibility: rune.divisibility
     }));
 
     console.log("Runes data to save:", runesDataToSave);
@@ -94,9 +95,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: "SERVER ERROR" }, { status: 500 });
   }
 }
+export const dynamic = "force-dynamic";
 
-export const config = {
-  api: {
-    runtime: "edge",
-  },
-};
+
+// export const config = {
+//   api: {
+//     runtime: "edge",
+//   },
+// };

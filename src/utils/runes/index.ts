@@ -94,32 +94,72 @@ export async function selectRunesUtxos(utxos: AddressTxsUtxo[], payment_address:
   return selectedUtxos;
 }
 
+// export const extractNameAndAmount = (rune: AssetMap) => {
+//   const entries = Object.entries(rune);
+//   const result = entries.map(([name, details]) => ({
+//     name,
+//     amount: details.amount,
+//     divisibility: details.divisibility
+    
+//   }));
+//   return result;
+// };
+
+// export const aggregateRuneAmounts = (runesUtxos: AddressTxsUtxo[]) => {
+//   const runeMap = new Map<string, number>();
+
+//   for (const runesUtxo of runesUtxos) {
+//     const rune = runesUtxo.rune;
+//     const runeDetails = extractNameAndAmount(rune);
+
+//     for (const { name, amount, divisibility } of runeDetails) {
+//       if (runeMap.has(name)) {
+//         runeMap.set(name, runeMap.get(name)! + amount);
+//       } else {
+//         runeMap.set(name, amount);
+//       }
+//     }
+//   }
+
+//   // Convert the Map to an array of objects
+//   const result = Array.from(runeMap, ([name, amount]) => ({ name, amount }));
+//   return result;
+// };
+
+
 export const extractNameAndAmount = (rune: AssetMap) => {
   const entries = Object.entries(rune);
   const result = entries.map(([name, details]) => ({
     name,
     amount: details.amount,
+    divisibility: details.divisibility
   }));
   return result;
 };
 
 export const aggregateRuneAmounts = (runesUtxos: AddressTxsUtxo[]) => {
-  const runeMap = new Map<string, number>();
+  // Map to store amounts and divisibility
+  const runeMap = new Map<string, { amount: number; divisibility: number }>();
 
   for (const runesUtxo of runesUtxos) {
     const rune = runesUtxo.rune;
     const runeDetails = extractNameAndAmount(rune);
 
-    for (const { name, amount } of runeDetails) {
+    for (const { name, amount, divisibility } of runeDetails) {
       if (runeMap.has(name)) {
-        runeMap.set(name, runeMap.get(name)! + amount);
+        const current = runeMap.get(name)!;
+        // Assuming divisibility should remain consistent, or you need a strategy to aggregate it
+        runeMap.set(name, { 
+          amount: current.amount + amount,
+          divisibility: divisibility // or some logic to combine divisibilities if needed
+        });
       } else {
-        runeMap.set(name, amount);
+        runeMap.set(name, { amount, divisibility });
       }
     }
   }
 
   // Convert the Map to an array of objects
-  const result = Array.from(runeMap, ([name, amount]) => ({ name, amount }));
+  const result = Array.from(runeMap, ([name, { amount, divisibility }]) => ({ name, amount, divisibility }));
   return result;
 };

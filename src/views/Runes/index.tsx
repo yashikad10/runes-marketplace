@@ -1,4 +1,3 @@
-
 import React, { useCallback, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
@@ -11,7 +10,7 @@ const Runes = ({ rune }: any) => {
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<string>("");
   const [action, setAction] = useState<string>("dummy");
   const [loading, setLoading] = useState<boolean>();
-  const [signedPsbtBase64, setSignedPsbtBase64]= useState<string>("");
+  const [signedPsbtBase64, setSignedPsbtBase64] = useState<string>("");
 
   const { loading: signLoading, result, error, signTx: sign } = useSignTx();
   const walletDetails = useWalletAddress();
@@ -35,7 +34,7 @@ const Runes = ({ rune }: any) => {
       action: "sell",
       inputs,
     };
-    
+
     // console.log(options, "OPTIONS");
 
     await sign(options);
@@ -64,15 +63,14 @@ const Runes = ({ rune }: any) => {
       ...psbtData,
       signed_listing_psbt_base64: signedPsbtBase64,
       maker_fee_bp: psbtData.maker_fee_bp,
-          seller_ord_address: psbtData.receive_address,
-          seller_receive_address: psbtData.receive_address,
-          price: psbtData.price,
-          tap_internal_key: walletDetails.ordinal_pubkey,
-          unsigned_listing_psbt_base64: psbtData.unsigned_psbt_base64,
+      seller_ord_address: psbtData.receive_address,
+      seller_receive_address: psbtData.receive_address,
+      price: psbtData.price,
+      tap_internal_key: walletDetails.ordinal_pubkey,
+      unsigned_listing_psbt_base64: psbtData.unsigned_psbt_base64,
     };
 
-    console.log(orderInput,"orderInput------")
-
+    console.log(orderInput, "orderInput------");
 
     try {
       const response = await axios.post("/api/v2/order/list-item", orderInput);
@@ -81,7 +79,6 @@ const Runes = ({ rune }: any) => {
       console.error("Error posting list item:", error);
     }
   };
-
 
   const toggleExpand = async (runeName: string) => {
     try {
@@ -101,7 +98,7 @@ const Runes = ({ rune }: any) => {
   const handleInputChange = (
     utxo_id: string,
     ordinal_address: string,
-    value: string,
+    value: string
   ) => {
     setInputValues((prevInputValues) => ({
       ...prevInputValues,
@@ -120,7 +117,8 @@ const Runes = ({ rune }: any) => {
   ) => {
     try {
       const inputValue = inputValues[`${utxo_id}-${receive_address}`];
-      const price = (amount * Number(inputValue || 0)) / Math.pow(10, divisibility); // Calculate price based on amount and input value
+      const price =
+        (amount * Number(inputValue || 0)) / Math.pow(10, divisibility); // Calculate price based on amount and input value
 
       const response = await axios.post("/api/v2/order/list-psbt", {
         utxo_id,
@@ -158,25 +156,25 @@ const Runes = ({ rune }: any) => {
   return (
     <div className="">
       {expandedRuneDetails?.map((runeDetail: any, detailIndex: number) => (
-        <div
-          key={detailIndex}
-          className="bg-[#1b4366] p-2 text-white shadow-md rounded-md"
-        >
+        <div key={detailIndex} className="bg-[#031524] p-2 text-white w-full">
           {runeDetail.runes?.map((item: any, index: number) => (
-            <div key={index} className="text-gray-100 flex flex-wrap text-sm">
-              <div className="px-4 py-4 whitespace-nowrap sm:w-auto w-3/12">
+            <div
+              key={index}
+              className="text-gray-100 flex flex-wrap items-center text-sm"
+            >
+              <div className="px-4 py-4 whitespace-nowrap flex-1">
                 <p className="font-semibold text-gray-400">Name:</p>
                 <p>{item.name}</p>
               </div>
-              <div className="px-6 py-4 whitespace-nowrap w-full sm:w-auto">
+              <div className="px-6 py-4 whitespace-nowrap flex-1">
                 <p className="font-semibold text-gray-400">Amount:</p>
-                <p>{item.amount}</p>
+                <p>{item.amount / Math.pow(10, item.divisibility)}</p>
               </div>
-              <div className="px-6 py-4 whitespace-nowrap w-full sm:w-auto">
+              <div className="px-6 py-4 whitespace-nowrap flex-1">
                 <p className="font-semibold text-gray-400">Input:</p>
                 <input
                   type="text"
-                  className="border border-gray-900 bg-transparent rounded outline-none px-3 text-white"
+                  className="border border-gray-900 bg-transparent rounded outline-none px-3 text-white w-full"
                   onChange={(e) =>
                     handleInputChange(
                       runeDetail.utxo_id,
@@ -187,11 +185,13 @@ const Runes = ({ rune }: any) => {
                   placeholder="Enter value"
                 />
               </div>
-              <div className="px-6 py-4 whitespace-nowrap w-full sm:w-auto">
+              <div className="px-6 py-4 whitespace-nowrap flex-1">
                 <p className="font-semibold text-gray-400">Product (in BTC):</p>
                 <p>
                   {calculateProduct(
-                    convertToSats(item.amount),
+                    convertToSats(
+                      item.amount / Math.pow(10, item.divisibility)
+                    ),
                     inputValues[
                       `${runeDetail.utxo_id}-${runeDetail.ordinal_address}`
                     ]
@@ -199,22 +199,24 @@ const Runes = ({ rune }: any) => {
                   BTC
                 </p>
               </div>
-              <div className="px-6 py-4 whitespace-nowrap w-full sm:w-auto">
+              <div className="px-6 py-4 whitespace-nowrap flex-1">
                 <p className="font-semibold text-gray-400">Dollar Value:</p>
                 <p>
                   $
                   {calculateDollarValue(
                     calculateProduct(
-                      convertToSats(item.amount),
+                      convertToSats(
+                        item.amount / Math.pow(10, item.divisibility)
+                      ),
                       inputValues[
                         `${runeDetail.utxo_id}-${runeDetail.ordinal_address}`
                       ]
                     )
-                  )}
+                  ).toFixed(2)}
                 </p>
               </div>
-              {!unsignedPsbtBase64 ? (
-                <div className="flex justify-end w-full">
+              <div className="px-6 py-4 whitespace-nowrap flex-1 flex justify-end">
+                {!unsignedPsbtBase64 ? (
                   <button
                     onClick={() =>
                       handleListNowClick(
@@ -227,36 +229,32 @@ const Runes = ({ rune }: any) => {
                         10
                       )
                     }
-                    className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2 mt-4"
+                    className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2"
                   >
                     List Now
                   </button>
-                </div>
-              ) : (
-                <div className="flex justify-end w-full">
+                ) : (
                   <button
                     onClick={signTx}
-                    className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2 mt-4"
+                    className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2"
                   >
                     Sign Now
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           ))}
         </div>
       ))}
       {psbtData && (
-        <div className="bg-[#1b4366] p-2 text-white shadow-md rounded-md mt-4">
+        <div className="bg-[#031524] p-2 text-white shadow-md  rounded-md mt-4">
           <h3 className="text-lg font-semibold">PSBT List</h3>
-          <div className="text-sm p-2">
+          <div className="text-sm p-2 ">
             <p className="p-2">Utxo_id: {psbtData.utxo_id}</p>
             <p className="p-2">Receive Address: {psbtData.receive_address}</p>
             <p className="p-2">
               Public Key:
-              {
-                walletDetails?.ordinal_pubkey
-              }
+              {walletDetails?.ordinal_pubkey}
             </p>
             <p className="p-2">Wallet: {walletDetails?.wallet}</p>
             <p className="p-2">Price: {psbtData.price}</p>

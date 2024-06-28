@@ -7,7 +7,6 @@ import {
 import dbConnect from "@/lib/dbConnect";
 import UtxoCollection from "@/models/UtxoCollection";
 
-
 interface OrderInput {
   value: number;
   vout: number;
@@ -86,13 +85,14 @@ export async function POST(req: NextRequest) {
         let listed_price_per_token = 0;
         let totalRunes = runeUtxo.runes[0].amount / Math.pow(10, runeUtxo.runes[0].divisibility)
         if (runeUtxo.runes && runeUtxo.runes.length > 0) {
-          listed_price_per_token = totalRunes / orderInput.price;
+          listed_price_per_token = totalRunes/orderInput.price;
         }
+        console.log(listed_price_per_token,"listed price per token")
         // Update the found document with new fields
         runeUtxo.listed = true;
         runeUtxo.listed_at = new Date();
         runeUtxo.listed_price = orderInput.price || 0; // Set default value if price is not provided
-        runeUtxo.listed_price_per_token = 0; // Set to appropriate value
+        runeUtxo.listed_price_per_token = listed_price_per_token; // Set to appropriate value
         runeUtxo.listed_seller_receive_address = orderInput.seller_receive_address || '';
         runeUtxo.signed_psbt = orderInput.signed_listing_psbt_base64;
         runeUtxo.unsigned_psbt = orderInput.unsigned_listing_psbt_base64 || '';
@@ -129,3 +129,5 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+export const dynamic = "force-dynamic";
+

@@ -92,11 +92,7 @@ const InnerMenu = ({ open, onClose, disconnect }: any) => {
         </div>
 
         <div className="flex ">
-          <img
-            alt="xverse"
-            src="https://play-lh.googleusercontent.com/UiUoRVY5QVI5DAZyP5s6xanuPRrd8HNbKGpjKt3HVPVuT6VJcnXVqR7V4ICQ9rYRCg=w240-h480-rw"
-            className="w-8 h-8 mb-4 mr-4"
-          />
+          
           <FaDiscord className="text-3xl text-indigo-500 " />
         </div>
       </div>

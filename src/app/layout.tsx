@@ -16,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <Provider store={store}>
-      <WalletProvider >
+      <WalletProvider customAuthOptions={{network:"testnet"}}>
       <html lang="en">
         <body className={inter.className}>
         <Header />

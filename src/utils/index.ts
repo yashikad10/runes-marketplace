@@ -131,10 +131,11 @@ export async function countDummyUtxos(
 
 
 
-
-export function CustomError(message: string, status: number = 500): Error {
-  const error: any = new Error(message);
-  error.name = 'CustomError';
-  error.status = status;
-  return error;
+export function convertSatoshiToBTC(satoshi:number) {
+  const SATOSHI_IN_ONE_BTC = 100000000;
+  return satoshi / SATOSHI_IN_ONE_BTC;
+}
+export function convertSatoshiToUSD(satoshi:number, btcPrice:number) {
+  const SATOSHI_IN_ONE_BTC = 100000000;
+  return (satoshi / SATOSHI_IN_ONE_BTC)* btcPrice;
 }

@@ -8,6 +8,7 @@ import { useWalletAddress } from "bitcoin-wallet-adapter";
 type Rune = {
   rune_name: string;
   rune_amount: number;
+  divisibility: number;
 };
 
 type User = {
@@ -21,28 +22,24 @@ type User = {
 const RunesData = () => {
   const [runesData, setRunesData] = useState<User | null>(null);
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const walletDetails=useWalletAddress();
+  const walletDetails = useWalletAddress();
 
-  console.log(walletDetails?.ordinal_address,"---------------wallet details")
-
-  // const ordinalAddress =
-  //   "bc1psghjrvpu9l7k55k2upfyj42nt8wjvm8gqedytvrvy8hqzt8lv0ys6jnp39"; 
+  console.log(walletDetails?.ordinal_address, "---------------wallet details");
 
   const fetchData = async () => {
     try {
       if (walletDetails && walletDetails.ordinal_address) {
         const response = await getRunesData(walletDetails.ordinal_address);
-        console.log(response,"--------------------response bc1p")
-        setRunesData(response?.data)
-      }else{
-        console.log("error-------------",walletDetails?.ordinal_address)
+        console.log(response, "--------------------response bc1p");
+        setRunesData(response?.data);
+      } else {
+        console.log("error-------------", walletDetails?.ordinal_address);
       }
     } catch (error) {
-      console.log("-------------catch error",walletDetails?.ordinal_address)
+      console.log("-------------catch error", walletDetails?.ordinal_address);
     }
   };
 
-  
   useEffect(() => {
     fetchData();
   }, [walletDetails]);
@@ -53,27 +50,34 @@ const RunesData = () => {
 
   return (
     <div className="p-8">
-      <h4 className="text-2xl font-semibold ml-2 mb-8 text-white" >Collection</h4>
-        <ul className="space-y-2 border border-[#28475C] rounded-md ">
-          {runesData?.runes.map((rune, index) => (
-            <li key={index} className="px-4 py-4 rounded  transition-colors duration-300 text-white border-b border-gray-600 ">
-              <div
-                className="flex justify-between items-center cursor-pointer mb-4"
-                onClick={() => toggleExpand(index)}
-              >
-                <div>
-                  <p className="font-semibold mb-2"> {rune.rune_name}</p>
-                  <p className="text-sm text-gray-400">Price: {rune.rune_amount}</p>
-                </div>
-
+      <h4 className="text-2xl font-semibold ml-2 mb-8 text-white">
+        Collection
+      </h4>
+      <ul className="space-y-2 border border-[#28475C] rounded-md ">
+        {runesData?.runes.map((rune, index) => (
+          <li
+            key={index}
+            className="rounded  transition-colors duration-300 text-white border-b border-gray-600 "
+          >
+            <div
+              className="flex justify-between items-center cursor-pointer mb-4"
+              onClick={() => toggleExpand(index)}
+            >
+              <div>
+                <p className="font-semibold mb-2 ml-4 mt-2">
+                  {" "}
+                  {rune.rune_name}
+                </p>
+                <p className="text-sm text-gray-400 ml-4">
+                  Price: {rune.rune_amount / Math.pow(10, rune.divisibility)}
+                </p>
               </div>
+            </div>
 
-              {expandedIndex === index && (
-                  <Runes rune={rune.rune_name} />
-              )}
-            </li>
-          ))}
-        </ul>
+            {expandedIndex === index && <Runes rune={rune.rune_name} />}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

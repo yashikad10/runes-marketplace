@@ -40,9 +40,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
+export const dynamic = "force-dynamic";
 
-export const config = {
-  api: {
-    runtime: "edge",
-  },
-};
+
+// export const config = {
+//   api: {
+//     runtime: "edge",
+//   },
+// };
