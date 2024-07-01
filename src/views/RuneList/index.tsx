@@ -3,9 +3,32 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
 import { convertSatoshiToBTC, convertSatoshiToUSD } from "@/utils";
+import axios from "axios";
 
 const RuneList = ({ list }: any) => {
   const btcPrice = useSelector((state: RootState) => state.general.btc_price);
+
+  // const handleBuyNowClick = async (
+  //   utxo_id: string,
+  //   pay_address:string,
+  //   receive_address: string,
+  //   publickey:string,
+  //   fee_rate: number,
+  //   wallet: string,
+  //   price:number
+    
+  // ) => {
+  //   try {
+  //     const response = await axios.post("/api/v2/order/create-buy-psbt", {
+  //       utxo_id,
+  //       receive_address,
+        
+  //     });
+  //     console.log(response.data, "psbt data");
+  //   } catch (error: any) {
+  //     console.error("Error fetching PSBT data:", error);
+  //   }
+  // };
 
   return (
     <div className=" min-h-screen p-8">

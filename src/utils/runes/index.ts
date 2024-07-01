@@ -34,7 +34,7 @@ export async function doesUtxoContainRunes(utxo: AddressTxsUtxo): Promise<any> {
   const cacheKey = `rune_utxo:${utxo.txid}:${utxo.vout}`;
   try {
     const apiUrl = process.env.NEXT_PUBLIC_NETWORK?.includes("testnet")
-      ? "http://64.20.33.102:56018/"
+      ? "http://192.168.1.17:8080/"
       : `${process.env.NEXT_PUBLIC_PROVIDER}/`;
 
     if (!apiUrl) {

@@ -128,14 +128,29 @@ export async function countDummyUtxos(
   return counter;
 }
 
-
-
-
-export function convertSatoshiToBTC(satoshi:number) {
+export function convertSatoshiToBTC(satoshi: number) {
   const SATOSHI_IN_ONE_BTC = 100000000;
   return satoshi / SATOSHI_IN_ONE_BTC;
 }
-export function convertSatoshiToUSD(satoshi:number, btcPrice:number) {
+export function convertSatoshiToUSD(satoshi: number, btcPrice: number) {
   const SATOSHI_IN_ONE_BTC = 100000000;
-  return (satoshi / SATOSHI_IN_ONE_BTC)* btcPrice;
+  return (satoshi / SATOSHI_IN_ONE_BTC) * btcPrice;
+}
+
+export async function fetchLatestUtxoData(utxo_id: string): Promise<any> {
+  const url = `${process.env.NEXT_PUBLIC_PROVIDER}/output/${utxo_id}`;
+  console.log("**************url:", url);
+  try {
+    // console.log("------------before response");
+    const response = await axios.get(url, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+    console.log(response,"------------response")
+    const data = response.data;
+    return data;
+  } catch (error: any) {
+    throw new Error(`Failed to fetch data: ${error.response.data}`);
+  }
 }
