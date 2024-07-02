@@ -4,46 +4,40 @@ import { validatePsbt } from "..";
 // Initialize the bitcoinjs-lib library with secp256k1
 bitcoin.initEccLib(ecc);
 
-
 export async function getTxHexById(txId: string): Promise<string> {
-    
-    const url =
-      process.env.NEXT_PUBLIC_NETWORK === "testnet"
-        ? `https://mempool.space/testnet/api/tx/${txId}/hex`
-        : `https://mempool-api.ordinalnovus.com/tx/${txId}/hex`;
+  const url =
+    process.env.NEXT_PUBLIC_NETWORK === "testnet"
+      ? `https://mempool.space/testnet/api/tx/${txId}/hex`
+      : `https://mempool-api.ordinalnovus.com/tx/${txId}/hex`;
 
-        console.log(url)
-    
-  
-  
+  console.log(url);
+
   return await fetch(url).then((response) => response.text());
+}
+
+export const toXOnly = (pubKey: string | any[]) =>
+  pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);
+
+export function getSellerOrdOutputValue(
+  price: number,
+  makerFeeBp: number | undefined,
+  prevUtxoValue: number
+): number {
+  if (makerFeeBp === undefined || makerFeeBp === null) {
+    console.log(
+      "makerFeeBp was undefined or null, setting to default 100 basis points"
+    );
+    makerFeeBp = 100; // if makerFeeBp is undefined or null, set it to 100 basis points (1%)
   }
-
-  export const toXOnly = (pubKey: string | any[]) =>
-    pubKey.length === 32 ? pubKey : pubKey.slice(1, 33);
-
-  export function getSellerOrdOutputValue(
-    price: number,
-    makerFeeBp: number | undefined,
-    prevUtxoValue: number
-  ): number {
-    if (makerFeeBp === undefined || makerFeeBp === null) {
-      console.log(
-        "makerFeeBp was undefined or null, setting to default 100 basis points"
-      );
-      makerFeeBp = 100; // if makerFeeBp is undefined or null, set it to 100 basis points (1%)
-    }
-    console.log("makerFeeBp: ", makerFeeBp);
-    const makerFeePercent = makerFeeBp / 10000; // converting basis points to percentage
-    console.log("makerFeePercent: ", makerFeePercent);
-    const makerFee = Math.floor(price * makerFeePercent);
-    console.log("Maker's fee: ", makerFee);
-    const outputValue = price - makerFee + prevUtxoValue;
-    console.log("Output Value: ", outputValue);
-    return Math.floor(outputValue);
-  }
-  
-
+  console.log("makerFeeBp: ", makerFeeBp);
+  const makerFeePercent = makerFeeBp / 10000; // converting basis points to percentage
+  console.log("makerFeePercent: ", makerFeePercent);
+  const makerFee = Math.floor(price * makerFeePercent);
+  console.log("Maker's fee: ", makerFee);
+  const outputValue = price - makerFee + prevUtxoValue;
+  console.log("Output Value: ", outputValue);
+  return Math.floor(outputValue);
+}
 
 function verifySignature(signedListingPSBT: string): boolean {
   try {
@@ -162,4 +156,3 @@ export {
   verifyAddress,
   addFinalScriptWitness,
 };
-

@@ -1,10 +1,12 @@
 "use client";
 import { getRunesList } from "@/apiHelper/getRunesList";
+import { RuneItem } from "@/types";
 import RuneList from "@/views/RuneList";
 import React, { useEffect, useState } from "react";
 
 const RuneListPage = () => {
-  const [list, setList] = useState<any[]>();
+  const [list, setList] = useState<RuneItem[]>();
+  console.log(list,'list*****')
 
   const runeList = async () => {
     try {
@@ -28,7 +30,7 @@ const RuneListPage = () => {
 
   return (
     <div>
-      <RuneList list={list} />
+      <RuneList />
     </div>
   );
 };

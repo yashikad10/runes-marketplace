@@ -6,13 +6,15 @@ export interface GeneralState {
   lastWallet: string;
   btc_price: number;
   network: "mainnet" | "testnet";
+  new_activity: boolean;
 }
 
 const initialState: GeneralState = {
   user: null,
   lastWallet: "",
   btc_price: 0,
-  network: "mainnet",
+  network: "mainnet" || "testnet",
+  new_activity: false
 };
 
 const walletSlice = createSlice({
@@ -34,9 +36,12 @@ const walletSlice = createSlice({
       console.log("setting network as : ", action.payload)
       state.network = action.payload;
     },
+    setNewActivity: (state, action: PayloadAction<boolean>) => {
+      state.new_activity = action.payload;
+    },
   },
 });
 
-export const { setUser, setLastWallet, setBtcPrice, setNetwork } =
+export const { setUser, setLastWallet, setBtcPrice, setNetwork, setNewActivity } =
   walletSlice.actions;
 export default walletSlice.reducer;

@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
      await dbConnect();
 
      const data= await UtxoCollection.find({listed: true})
-     .select("listed_price runes.name runes.amount runes.divisibility ")
+     .select("-signed_psbt -unsigned_psbt")
 
      console.log(data,"data*******")
 

@@ -74,3 +74,33 @@ export interface CommonSignResponse {
   error: Error | null;
   sign: (options: CommonSignOptions) => Promise<void>;
 }
+
+
+export interface RuneItem {
+  _id: string;
+  ordinal_address: string;
+  txid: string;
+  vout: number;
+  utxo_id: string;
+  value: number;
+  status: {
+    confirmed: boolean;
+    block_height: number;
+    block_hash: string;
+    block_time: number;
+  };
+  runes: {
+    name: string;
+    amount: number;
+    divisibility: number;
+    symbol: string;
+  }[];
+  maker_fee_bp: number;
+  listed: boolean;
+  listed_maker_fee_bp: number;
+  __v: number;
+  listed_at: string;
+  listed_price: number;
+  listed_price_per_token: number;
+  listed_seller_receive_address: string;
+}

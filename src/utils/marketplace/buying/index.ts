@@ -46,7 +46,7 @@ export async function buyOrdinalPSBT(
   let paymentUtxos: AddressTxsUtxo[] | undefined;
   try {
     payerUtxos = await getUtxosByAddress(payerAddress);
-    console.log(payerUtxos,"****payerUtxos")
+    console.log(payerUtxos, "****payerUtxos");
   } catch (e) {
     console.error(e);
     return Promise.reject("Mempool error");
@@ -61,25 +61,22 @@ export async function buyOrdinalPSBT(
   //   minimumValueRequired = numberOfDummyUtxosToCreate * DUMMY_UTXO_VALUE;
   //   vins = 0;
   //   vouts = numberOfDummyUtxosToCreate;
-  // } else 
-  
-    minimumValueRequired =
-      price + numberOfDummyUtxosToCreate * DUMMY_UTXO_VALUE;
-    vins = 3;
-    vouts = 4 + numberOfDummyUtxosToCreate;
-    // add fee to minimumValueRequired
-    let platformFeeValue = Math.floor(
-      (minimumValueRequired * (0 + 100)) / 10000
-    );
-    // Assuming minimumValueRequired is in satoshis
-    platformFeeValue = Math.max(Math.round(minimumValueRequired * 0.01), 4000);
-    minimumValueRequired = minimumValueRequired + platformFeeValue;
-    console.log({ minimumValueRequired });
-  
+  // } else
+
+  minimumValueRequired = price + numberOfDummyUtxosToCreate * DUMMY_UTXO_VALUE;
+  vins = 3;
+  vouts = 4 + numberOfDummyUtxosToCreate;
+  // add fee to minimumValueRequired
+  let platformFeeValue = Math.floor((minimumValueRequired * (0 + 100)) / 10000);
+  // Assuming minimumValueRequired is in satoshis
+  platformFeeValue = Math.max(Math.round(minimumValueRequired * 0.01), 4000);
+  minimumValueRequired = minimumValueRequired + platformFeeValue;
+  console.log({ minimumValueRequired });
+
   try {
     const taprootAddress =
       receiverAddress.startsWith("bc1p") || receiverAddress.startsWith("tb1p");
-      paymentUtxos = await selectPaymentUTXOs(
+    paymentUtxos = await selectPaymentUTXOs(
       payerUtxos,
       minimumValueRequired,
       vins,
@@ -87,7 +84,7 @@ export async function buyOrdinalPSBT(
       fee_rate,
       taprootAddress
     );
-    console.log(paymentUtxos,"----paymentUtxos")
+    console.log(paymentUtxos, "----paymentUtxos");
     let psbt: any = null;
     if (
       // dummyUtxos &&
@@ -132,14 +129,14 @@ export async function buyOrdinalPSBT(
         },
       };
     } else {
-    //   if (paymentUtxos)
-    //     psbt = await generateUnsignedCreateDummyUtxoPSBTBase64(
-    //       payerAddress,
-    //       publickey,
-    //       paymentUtxos,
-    //       fee_rate,
-    //       wallet
-    //     );
+      //   if (paymentUtxos)
+      //     psbt = await generateUnsignedCreateDummyUtxoPSBTBase64(
+      //       payerAddress,
+      //       publickey,
+      //       paymentUtxos,
+      //       fee_rate,
+      //       wallet
+      //     );
       console.log(psbt, "PSBT CREATED");
       return {
         status: "success",
@@ -148,7 +145,7 @@ export async function buyOrdinalPSBT(
           paymentUtxos,
           payerAddress,
           numberOfDummyUtxosToCreate,
-          dummyUtxos:[],
+          dummyUtxos: [],
           psbt,
           for: "dummy",
         },
@@ -174,7 +171,7 @@ async function selectDummyUTXOs(
         continue;
       }
       const mappedUtxo = await mapUtxos([utxo]);
-      console.log(mappedUtxo,"****mappedUtxos")
+      console.log(mappedUtxo, "****mappedUtxos");
       result.push(mappedUtxo[0]);
       counter++;
       if (counter === 2) {
@@ -204,9 +201,9 @@ export async function selectPaymentUTXOs(
       continue;
     }
     selectedUtxos.push(utxo);
-    console.log(selectedUtxos,"=============selectedUtxos")
+    console.log(selectedUtxos, "=============selectedUtxos");
     selectedAmount += utxo.value;
-   
+
     if (
       selectedAmount >=
       amount +
@@ -223,7 +220,7 @@ export async function selectPaymentUTXOs(
       break;
     }
   }
-  console.log(selectedAmount,"selected amount****")
+  console.log(selectedAmount, "selected amount****");
   if (selectedAmount < amount) {
     // console.log(selectedAmount,"selected amount****")
     throw `Your wallet needs ${Number(
@@ -233,16 +230,20 @@ export async function selectPaymentUTXOs(
   return selectedUtxos;
 }
 
-async function generateUnsignedBuyingPSBTBase64(
-  listing: any,
-  wallet: string
-) {
-  console.log({listing},"*****listing")
+async function generateUnsignedBuyingPSBTBase64(listing: any, wallet: string) {
+  console.log({ listing }, "*****listing");
   wallet = wallet.toLowerCase();
-  const psbt = new bitcoin.Psbt({ network: process.env.NEXT_PUBLIC_NETWORK==="testnet"? testnet:undefined });
+  const psbt = new bitcoin.Psbt({
+    network:
+      process.env.NEXT_PUBLIC_NETWORK === "testnet" ? testnet : undefined,
+  });
   const collection = listing.seller.ordItem.official_collection;
-  const taprootAddress = listing?.buyer?.buyerAddress.startsWith("bc1p") || listing?.buyer?.buyerAddress.startsWith("tb1p");
-  const segwitAddress = listing?.buyer?.buyerAddress.startsWith("bc1q") || listing?.buyer?.buyerAddress.startsWith("tb1q");
+  const taprootAddress =
+    listing?.buyer?.buyerAddress.startsWith("bc1p") ||
+    listing?.buyer?.buyerAddress.startsWith("tb1p");
+  const segwitAddress =
+    listing?.buyer?.buyerAddress.startsWith("bc1q") ||
+    listing?.buyer?.buyerAddress.startsWith("tb1q");
   const buyerPublicKey = listing?.buyer?.buyerPublicKey;
   if (
     !listing.buyer ||
@@ -319,11 +320,11 @@ async function generateUnsignedBuyingPSBTBase64(
     address: listing.buyer.buyerTokenReceiveAddress,
     value: ORDINALS_POSTAGE_VALUE,
   });
-  console.log({address:listing.buyer.buyerTokenReceiveAddress})
+  console.log({ address: listing.buyer.buyerTokenReceiveAddress });
   const { sellerInput, sellerOutput } = await getSellerInputAndOutput(listing);
   psbt.addInput(sellerInput);
   psbt.addOutput(sellerOutput);
-  console.log(sellerOutput,"seller output***")
+  console.log(sellerOutput, "seller output***");
   // Add payment utxo inputs
   for (const utxo of listing.buyer.buyerPaymentUTXOs) {
     const tx = bitcoin.Transaction.fromHex(await getTxHexById(utxo.txid));
@@ -400,7 +401,7 @@ async function generateUnsignedBuyingPSBTBase64(
     (partialSum, a) => partialSum + a.value,
     0
   );
-  
+
   const changeValue = totalInput - totalOutput - fee;
   if (changeValue < 0) {
     throw `Your wallet needs ${Number(
@@ -412,7 +413,7 @@ async function generateUnsignedBuyingPSBTBase64(
   Missing:    ${convertSatToBtc(-changeValue)} BTC`;
   }
 
-  console.log({changeValue, value: listing.seller.ordItem.value})
+  console.log({ changeValue, value: listing.seller.ordItem.value });
   // Change utxo
   if (changeValue > DUMMY_UTXO_MIN_VALUE) {
     psbt.addOutput({
@@ -494,5 +495,3 @@ export function mergeSignedBuyingPSBTBase64(
   console.log("[INFO] Serializing merged PSBT to Base64.");
   return buyerSignedPsbt.toBase64();
 }
-
-

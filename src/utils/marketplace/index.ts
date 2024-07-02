@@ -85,6 +85,15 @@ function ecdsaValidator(
   return ecc.verify(msghash, signature, pubkey);
 }
 
+export const fromXOnly = (buffer: Buffer): string => {
+  // Check if buffer has a length of 32, which means it was not sliced
+  if (buffer.length === 32) {
+    return buffer.toString("hex");
+  } else {
+    throw Error("Wrong pubkey");
+  }
+};
+
 export async function mapUtxos(
   utxosFromMempool: AddressTxsUtxo[]
 ): Promise<UTXO[]> {
