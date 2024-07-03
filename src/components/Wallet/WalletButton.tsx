@@ -6,6 +6,7 @@ import { getBTCPriceInDollars } from "@/utils";
 import { setBtcPrice, setUser } from "@/stores/reducers/generalReducer";
 import { useEffect, useCallback } from "react";
 import axios from "axios";
+import { getRunes } from "@/apiHelper/getRunes";
 
 const WalletButton = () => {
   const walletDetails = useWalletAddress();
@@ -51,13 +52,11 @@ const WalletButton = () => {
 
         console.log(body,"---------------------------");
 
-        const response = await axios.post('/api/runes', body, {
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        });
-
-        console.log(response,"rune user data");
+      if(walletDetails && walletDetails.connected && walletDetails.ordinal_address){
+        // const ordinal_address = walletDetails?.ordinal_address
+        const response = await getRunes(walletDetails);
+      }
+        
       } catch (error) {
         console.error('Error :', error);
       }

@@ -20,6 +20,7 @@ const UserCollectionSchema = new Schema<UserCollectionType>({
   ordinal_address: {
     type: String,
     required: true,
+    unique: true
   },
   cardinal_pubkey: {
     type: String,

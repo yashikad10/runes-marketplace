@@ -3,12 +3,13 @@ import UserCollection from "@/models/UserCollection";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
+  console.log("*******display runes route call ********")
   try {
     await dbConnect();
 
     const { searchParams } = new URL(req.url);
     const ordinal_address = searchParams.get("ordinal_address");
-    console.log(ordinal_address);
+    console.log(ordinal_address,"***********display inside runes");
 
     if (!ordinal_address) {
       return NextResponse.json(
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const user = await UserCollection.findOne({ ordinal_address }).exec();
+    const user = await UserCollection.findOne({ ordinal_address });
     console.log(user, "-----------------user inside route display rune");
     if (!user) {
       return NextResponse.json(
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(user, { status: 200 });
+    return NextResponse.json({user, success: true});
   } catch (err) {
     console.error("Error in GET request handler:", err);
     return NextResponse.json({ message: "Server error" }, { status: 500 });
@@ -34,9 +35,3 @@ export async function GET(req: NextRequest) {
 }
 export const dynamic = "force-dynamic";
 
-
-// export const config = {
-//   api: {
-//     runtime: "edge",
-//   },
-// };

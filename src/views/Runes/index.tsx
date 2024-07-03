@@ -3,47 +3,49 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/stores";
 import axios from "axios";
 import { useWalletAddress, useSignTx } from "bitcoin-wallet-adapter";
+import { getListPsbt } from "@/apiHelper/getListPsbt";
+
 const Runes = ({ rune }: any) => {
   const [expandedRuneDetails, setExpandedRuneDetails] = useState<any>(null);
   const [psbtData, setPsbtData] = useState<any>(null);
   const [inputValues, setInputValues] = useState<{ [key: string]: string }>({});
-  const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<string>("");
-  const [action, setAction] = useState<string>("dummy");
+  const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<{
+    [key: string]: string;
+  }>({});
   const [loading, setLoading] = useState<boolean>();
   const [signedPsbtBase64, setSignedPsbtBase64] = useState<string>("");
 
   const { loading: signLoading, result, error, signTx: sign } = useSignTx();
   const walletDetails = useWalletAddress();
 
-  const signTx = useCallback(async () => {
-    if (!walletDetails) {
-      alert("wallet details missing");
-      return;
-    }
-    let inputs = [];
-    inputs.push({
-      address: walletDetails.ordinal_address,
-      publickey: walletDetails.ordinal_pubkey,
-      sighash: 131,
-      index: [0],
-    });
+  const signTx = useCallback(
+    async (utxoId: string) => {
+      if (!walletDetails) {
+        alert("wallet details missing");
+        return;
+      }
+      let inputs = [];
+      inputs.push({
+        address: walletDetails.ordinal_address,
+        publickey: walletDetails.ordinal_pubkey,
+        sighash: 131,
+        index: [0],
+      });
 
-    const options: any = {
-      psbt: unsignedPsbtBase64,
-      network: process.env.NEXT_PUBLIC_NETWORK || "Mainnet",
-      action: "sell",
-      inputs,
-    };
+      const options: any = {
+        psbt: unsignedPsbtBase64[utxoId],
+        network: process.env.NEXT_PUBLIC_NETWORK || "Mainnet",
+        action: "sell",
+        inputs,
+      };
 
-    // console.log(options, "OPTIONS");
-
-    await sign(options);
-  }, [action, unsignedPsbtBase64]);
+      await sign(options);
+    },
+    [unsignedPsbtBase64, walletDetails, psbtData]
+  );
 
   useEffect(() => {
-    // Handling Wallet Sign Results/Errors
     if (result) {
-      // Handle successful result from wallet sign
       setSignedPsbtBase64(result);
       handleListing(result);
       console.log("Sign Result:", result);
@@ -70,7 +72,7 @@ const Runes = ({ rune }: any) => {
       unsigned_listing_psbt_base64: psbtData.unsigned_psbt_base64,
     };
 
-    console.log(orderInput, "orderInput------");
+    console.log(orderInput, "------orderInput------");
 
     try {
       const response = await axios.post("/api/v2/order/list-item", orderInput);
@@ -83,7 +85,7 @@ const Runes = ({ rune }: any) => {
   const toggleExpand = async (runeName: string) => {
     try {
       const response = await axios.get(
-        `/api/runeDetails?rune_name=${runeName}`
+        `/api/rune-details?rune_name=${runeName}`
       );
       setExpandedRuneDetails(response.data);
     } catch (error: any) {
@@ -118,9 +120,9 @@ const Runes = ({ rune }: any) => {
     try {
       const inputValue = inputValues[`${utxo_id}-${receive_address}`];
       const price =
-        (amount * Number(inputValue || 0)) / Math.pow(10, divisibility); // Calculate price based on amount and input value
+        (amount * Number(inputValue || 0)) / Math.pow(10, divisibility);
 
-      const response = await axios.post("/api/v2/order/list-psbt", {
+      const response = await getListPsbt({
         utxo_id,
         receive_address,
         price,
@@ -129,10 +131,17 @@ const Runes = ({ rune }: any) => {
         wallet,
         maker_fee_bp,
       });
-
-      setPsbtData(response.data);
-      setUnsignedPsbtBase64(response.data.unsigned_psbt_base64);
-      console.log(response.data, "psbt data");
+      console.log(response?.data?.result, "** psbt data **");
+      if (response) {
+        setPsbtData(response.data?.result);
+        setUnsignedPsbtBase64((prev) => ({
+          ...prev,
+          [utxo_id]: response.data?.result?.unsigned_psbt_base64 || "",
+        }));
+        console.log(response.data, "psbt data");
+      } else {
+        console.error("Failed to fetch PSBT data");
+      }
     } catch (error: any) {
       console.error("Error fetching PSBT data:", error);
     }
@@ -145,14 +154,16 @@ const Runes = ({ rune }: any) => {
   };
 
   const calculateDollarValue = (amount: number) => {
-    const productInBTC = amount * BtcPrice; // Convert SATs to BTC
+    const productInBTC = amount * BtcPrice;
     return productInBTC;
   };
 
   const convertToSats = (amount: number) => {
-    return amount / 100000000; // Convert amount to SATs
+    return amount / 100000000;
   };
+  console.log({ psbtData });
 
+  console.log(expandedRuneDetails,"expandedRuneDetails**")
   return (
     <div className="">
       {expandedRuneDetails?.map((runeDetail: any, detailIndex: number) => (
@@ -216,26 +227,39 @@ const Runes = ({ rune }: any) => {
                 </p>
               </div>
               <div className="px-6 py-4 whitespace-nowrap flex-1 flex justify-end">
-                {!unsignedPsbtBase64 ? (
-                  <button
+                {!unsignedPsbtBase64[runeDetail.utxo_id] ||
+                psbtData?.utxo_id != runeDetail?.utxo_id ? (
+                 <div className="">
+                  {/* {console.log({runeDetail})} */}
+                  {!runeDetail.listed ? (
+                    <button
                     onClick={() =>
                       handleListNowClick(
                         runeDetail.utxo_id,
                         runeDetail.ordinal_address,
                         item.amount,
                         item.divisibility,
-                        "0340bcde6e4978ad224aff48503ad05dc120a21db83b353b1baeaed2a4c10221be",
-                        "Leather",
+                        walletDetails?.ordinal_pubkey || "",
+                        walletDetails?.wallet || "",
                         10
                       )
                     }
                     className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2"
                   >
-                    List Now
+                    List now
                   </button>
+                  ) : ( 
+                    <button
+                 
+                    className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2"
+                  >
+                    Listed
+                  </button>
+                  )}
+                 </div>
                 ) : (
                   <button
-                    onClick={signTx}
+                    onClick={() => signTx(runeDetail.utxo_id)}
                     className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2"
                   >
                     Sign Now
@@ -266,3 +290,22 @@ const Runes = ({ rune }: any) => {
 };
 
 export default Runes;
+
+
+
+{/* <button
+onClick={() =>
+  handleListNowClick(
+    runeDetail.utxo_id,
+    runeDetail.ordinal_address,
+    item.amount,
+    item.divisibility,
+    walletDetails?.ordinal_pubkey || "",
+    walletDetails?.wallet || "",
+    10
+  )
+}
+className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2"
+>
+{expandedRuneDetails.Listed === true ? "List" : "listed"}
+</button> */}

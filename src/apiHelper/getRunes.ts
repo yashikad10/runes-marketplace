@@ -1,15 +1,26 @@
 "use server";
-import { Utxo } from "@/models/UtxoCollection";
 import axios from "axios";
-interface UserResponse {
+interface RunesResponse {
   success: boolean;
-  data: Utxo;
+  message: string;
 }
-export async function getRunesList(
-): Promise<{ data?: UserResponse; error: string | null } | undefined> {
+
+interface WalletTypes {
+  cardinal_address?: string;
+  ordinal_address?: string;
+  cardinal_pubkey?: string;
+  wallet?: any;
+  connected:boolean;
+}
+export async function getRunes(
+  wallet_details: WalletTypes 
+): Promise<{ data?: RunesResponse; error: string | null } | undefined> {
   try {
-    let url = `${process.env.NEXT_PUBLIC_URL}/api/runes-list`;
-    const response = await axios.get(url);
+    let url = `${process.env.NEXT_PUBLIC_URL}/api/runes`;
+    const response = await axios.post(url,{
+      wallet_details
+      
+    });
     if (response.status === 200) {
       return { data: response.data, error: null };
     } else {

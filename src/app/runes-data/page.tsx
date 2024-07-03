@@ -31,7 +31,11 @@ const RunesData = () => {
       if (walletDetails && walletDetails.ordinal_address) {
         const response = await getRunesData(walletDetails.ordinal_address);
         console.log(response, "--------------------response bc1p");
-        setRunesData(response?.data);
+        if (response?.data?.user) {
+          setRunesData(response.data.user);
+        } else {
+          console.error('User data not found in response or response structure is incorrect.');
+        }
       } else {
         console.log("error-------------", walletDetails?.ordinal_address);
       }

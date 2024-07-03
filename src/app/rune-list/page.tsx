@@ -6,14 +6,14 @@ import React, { useEffect, useState } from "react";
 
 const RuneListPage = () => {
   const [list, setList] = useState<RuneItem[]>();
-  console.log(list,'list*****')
+  // console.log(list,'list*****')
 
   const runeList = async () => {
     try {
       const res = await getRunesList();
       const dataArray = res?.data?.data;
+      
 
-      // Check if dataArray is defined and is an array
       if (Array.isArray(dataArray)) {
         setList(dataArray);
       } else {

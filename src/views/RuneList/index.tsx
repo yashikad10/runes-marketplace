@@ -10,6 +10,7 @@ import mixpanel from "mixpanel-browser";
 import { addNotification } from "@/stores/reducers/notificationReducer";
 import { setNewActivity } from "@/stores/reducers/generalReducer";
 import { useRouter } from "next/navigation";
+import { getCreateBuyPsbt } from "@/apiHelper/getCreateBuyPsbt";
 
 const RuneList = () => {
   const router = useRouter();
@@ -59,19 +60,36 @@ const RuneList = () => {
   ) => {
     console.log(utxo_id, "------------");
     try {
-      const response = await axios.post("/api/v2/order/create-buy-psbt", {
+      // const response = await axios.post("/api/v2/order/create-buy-psbt", {
+      //   utxo_id,
+      //   pay_address,
+      //   receive_address,
+      //   publickey,
+      //   fee_rate,
+      //   wallet,
+      //   price,
+      // });
+      // setBuyPsbtData(response.data);
+      // setUnsignedPsbtBase64(response.data.unsigned_psbt_base64);
+
+      // console.log(response.data, "create-buy-psbt data");
+      const response = await getCreateBuyPsbt(
         utxo_id,
         pay_address,
         receive_address,
         publickey,
         fee_rate,
         wallet,
-        price,
-      });
-      setBuyPsbtData(response.data);
-      setUnsignedPsbtBase64(response.data.unsigned_psbt_base64);
-
-      console.log(response.data, "create-buy-psbt data");
+        price
+      );
+      
+      if (response?.data) {
+        setBuyPsbtData(response.data);
+        setUnsignedPsbtBase64(response.data?.result?.unsigned_psbt_base64);
+        console.log(response.data, "create-buy-psbt data");
+      } else {
+        console.error("Error fetching PSBT data:", response?.error);
+      }
     } catch (error: any) {
       console.error("Error fetching PSBT data:", error);
     }
@@ -111,7 +129,7 @@ const RuneList = () => {
     }
     const options: any = {
       psbt: unsignedPsbtBase64,
-      network: "testnet",
+      network: process.env.NEXT_PUBLIC_NETWORK || "Mainnet",
       action,
       inputs,
     };

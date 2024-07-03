@@ -156,17 +156,18 @@ export async function POST(
       console.log(psbt,"psbt****")
     return NextResponse.json({
       ok: true,
-      unsigned_psbt_base64: psbt,
-      input_length:
-        result.data.for === "dummy"
-          ? 1
-          : result.data.psbt.buyer.unsignedBuyingPSBTInputSize,
-      // ...result,
-      utxo_id: body.utxo_id,
-      receive_address: body.receive_address,
-      pay_address: body.pay_address,
-      for: result.data.for,
-      message: "Success",
+      result:{
+        unsigned_psbt_base64: psbt,
+        input_length:
+          result.data.for === "dummy"
+            ? 1
+            : result.data.psbt.buyer.unsignedBuyingPSBTInputSize,
+        // ...result,
+        utxo_id: body.utxo_id,
+        receive_address: body.receive_address,
+        pay_address: body.pay_address,
+        for: result.data.for,
+      }
     });
   } catch (error: any) {
     console.error(error);
@@ -179,17 +180,6 @@ export async function POST(
     );
   }
 }
-
-// export  function GET() {
-//     try{
-
-
-//     }catch{
-//         console.log("error")
-//     }
-
-    
-// }
 export const dynamic = "force-dynamic";
 
 

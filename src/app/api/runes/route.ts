@@ -9,15 +9,20 @@ export async function POST(req: NextRequest) {
     const data = await req.json();
     const { cardinal_address, ordinal_address, cardinal_pubkey, wallet } = data;
 
+    // console.log(data,"------------------data")
     const dataToSave = {
-      cardinal_address,
-      ordinal_address,
-      cardinal_pubkey,
-      wallet,
+      cardinal_address:data.wallet_details.cardinal_address,
+      ordinal_address:data.wallet_details.ordinal_address,
+      cardinal_pubkey:data.wallet_details.cardinal_pubkey,
+      wallet:data.wallet_details.wallet,
       runes: [],
     };
-    console.log(data, "---------------------user runes");
+
+    // console.log(dataToSave,"------------data to save")
+    // console.log(data.wallet_details.ordinal_address, "---------------------user runes ordinal address");
+    const runesUtxos = await getRunesUtxos(data.wallet_details.ordinal_address);
     await dbConnect()
+
     const existingUser = await UserCollection.findOne({
       $or: [{ cardinal_address }, { ordinal_address }],
     });
@@ -28,8 +33,6 @@ export async function POST(req: NextRequest) {
     } else {
       console.log("User data already exists, not saving again.");
     }
-
-    const runesUtxos = await getRunesUtxos(ordinal_address);
 
     if (!runesUtxos || runesUtxos.length === 0) {
       return NextResponse.json({ message: "No relevant UTXOs found" });
@@ -43,7 +46,7 @@ export async function POST(req: NextRequest) {
       divisibility: rune.divisibility
     }));
 
-    console.log("Runes data to save:", runesDataToSave);
+    // console.log("Runes data to save:", runesDataToSave);
 
     await dbConnect();
 
@@ -55,7 +58,7 @@ export async function POST(req: NextRequest) {
           divisibility: number;
           symbol: string;
         };
-        console.log({ runeValue });
+        // console.log({ runeValue });
 
         return {
           name: key,
@@ -68,7 +71,7 @@ export async function POST(req: NextRequest) {
       return { ...rest, runes };
     });
 
-    console.log(allRuneUtxo);
+    // console.log(allRuneUtxo);
 
     for (const utxo of allRuneUtxo) {
       const existingUtxo = await UtxoCollection.findOne({
@@ -85,12 +88,12 @@ export async function POST(req: NextRequest) {
     }
     const updateResult = await UserCollection.updateMany(
       {},
-      { $set: { runes: runesDataToSave } } // Set the runes field to the new data
+      { $set: { runes: runesDataToSave } } 
     );
 
     console.log("Document updated:", updateResult);
 
-    return NextResponse.json({ message: "done" });
+    return NextResponse.json({ message: "done" , success: true});
   } catch (err: any) {
     console.error("Error in POST request handler:", err);
     return NextResponse.json({ message: "SERVER ERROR" }, { status: 500 });
@@ -98,9 +101,3 @@ export async function POST(req: NextRequest) {
 }
 export const dynamic = "force-dynamic";
 
-
-// export const config = {
-//   api: {
-//     runtime: "edge",
-//   },
-// };

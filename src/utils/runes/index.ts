@@ -5,10 +5,12 @@ import { address } from "bitcoinjs-lib";
 const DUMMY_UTXO_VALUE = 1000;
 
 export async function getRunesUtxos(payment_address: string) {
+  console.log(payment_address,"-----------------payment address")
   let allUtxos: AddressTxsUtxo[];
   let runesUtxos: AddressTxsUtxo[] | undefined;
   try {
     allUtxos = await getUtxosByAddress(payment_address); //get users all utxo
+    
   } catch (e) {
     console.error(e);
     return Promise.reject("Mempool error");
@@ -20,10 +22,10 @@ export async function getRunesUtxos(payment_address: string) {
       payment_address
     );
 
-    // console.log({
-    //   allUtxos: allUtxos.length,
-    //   runesUtxos: runesUtxos && runesUtxos.length,
-    // });
+    console.log({
+      allUtxos: allUtxos.length,
+      runesUtxos: runesUtxos && runesUtxos.length,
+    });
     return runesUtxos;
   } catch (err: any) {
     throw Error(err);

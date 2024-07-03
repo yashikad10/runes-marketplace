@@ -146,13 +146,12 @@ export async function POST(
     );
     return NextResponse.json({
       ok: true,
-      utxo_id: body.utxo_id,
+    result:{  utxo_id: body.utxo_id,
       price: Math.floor(body.price),
       receive_address: body.receive_address,
       unsigned_psbt_base64: unsignedPsbtBase64,
       tap_internal_key,
-      message: "Success",
-      utxoData
+      }
     });
   } catch (error: any) {
     console.log(error, "error");
