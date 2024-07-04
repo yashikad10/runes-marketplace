@@ -1,5 +1,5 @@
 "use server";
-import { Utxo } from "@/models/UtxoCollection";
+import { Utxo } from "@/models/Utxos";
 import axios from "axios";
 interface UserResponse {
   success: boolean;
