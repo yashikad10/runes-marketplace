@@ -1,9 +1,9 @@
 // pages/api/v1/order/createBuyPsbt.ts
 import dbConnect from "@/lib/dbConnect";
 import { NextRequest, NextResponse } from "next/server";
-import UtxoCollection from "@/models/UtxoCollection";
 import { buyOrdinalPSBT } from "@/utils/marketplace/buying";
 import { fetchLatestUtxoData } from "@/utils";
+import Utxos from "@/models/Utxos";
 
 interface OrderInput {
   utxo_id: string;
@@ -48,13 +48,13 @@ async function processRuneItem(
   expected_price: number
 ) {
   const ordItem: any = await fetchLatestUtxoData(utxo_id);
-  console.log(ordItem," -----ordItem----")
+  console.log(ordItem, " -----ordItem----");
   await dbConnect();
-  const dbItem: any | null = await UtxoCollection.findOne({
+  const dbItem: any | null = await Utxos.findOne({
     utxo_id,
     listed: true,
-  })
-  console.log(dbItem, "----dbItem----")
+  });
+  console.log(dbItem, "----dbItem----");
   // .populate("official_collection");
   console.log("got db listing");
   if (!dbItem || !dbItem.ordinal_address) {
@@ -64,7 +64,9 @@ async function processRuneItem(
     throw Error("Item bought by someone else!!");
   }
   if (
-    (ordItem && ordItem.address && ordItem.address !== dbItem.ordinal_address) ||
+    (ordItem &&
+      ordItem.address &&
+      ordItem.address !== dbItem.ordinal_address) ||
     dbItem.output !== ordItem.output
   ) {
     dbItem.listed = false;
@@ -81,7 +83,6 @@ async function processRuneItem(
     dbItem.save();
     throw Error("PSBT Expired");
   }
-  
 
   if (dbItem.listed_price !== expected_price) {
     console.log({ price: dbItem.listed_price, expected_price });
@@ -125,7 +126,7 @@ export async function POST(
   console.log("***** CREATE UNSIGNED BUY PSBT API CALLED *****");
   try {
     const body: OrderInput = await req.json();
-    console.log(body,"body ****" )
+    console.log(body, "body ****");
     const missingFields = validateRequest(body);
 
     if (missingFields.length > 0) {
@@ -146,17 +147,17 @@ export async function POST(
       body.fee_rate,
       body.price
     );
-    console.log(result,"result****")
+    console.log(result, "result****");
     //buy psbt || dummy utxo psbt
-    
+
     const psbt = result.data.psbt.buyer
       ? result.data.psbt.buyer.unsignedBuyingPSBTBase64
       : result.data.psbt;
 
-      console.log(psbt,"psbt****")
+    console.log(psbt, "psbt****");
     return NextResponse.json({
       ok: true,
-      result:{
+      result: {
         unsigned_psbt_base64: psbt,
         input_length:
           result.data.for === "dummy"
@@ -167,7 +168,7 @@ export async function POST(
         receive_address: body.receive_address,
         pay_address: body.pay_address,
         for: result.data.for,
-      }
+      },
     });
   } catch (error: any) {
     console.error(error);
@@ -181,5 +182,3 @@ export async function POST(
   }
 }
 export const dynamic = "force-dynamic";
-
-

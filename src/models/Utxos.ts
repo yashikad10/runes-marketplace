@@ -68,7 +68,7 @@ export interface Utxo extends Document {
   
 }
 
-const utxoCollectionSchema = new Schema<Utxo>({
+const utxoSchema = new Schema<Utxo>({
   ordinal_address: { type: String, required: true },
   txid: { type: String, required: true },
   vout: { type: Number, required: true },
@@ -91,6 +91,6 @@ const utxoCollectionSchema = new Schema<Utxo>({
   listed_maker_fee_bp: { type: Number, default: 100 },
 });
 
-export default models.UtxoCollection ||
-  model<Utxo>("UtxoCollection", utxoCollectionSchema);
+export default models.Utxo ||
+  model<Utxo>("Utxo", utxoSchema);
 

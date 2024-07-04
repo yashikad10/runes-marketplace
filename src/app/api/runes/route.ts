@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
-import UserCollection from "@/models/UserCollection";
-import UtxoCollection from "@/models/UtxoCollection";
+import Users from "@/models/Users";
+import Utxos from "@/models/Utxos";
 import { aggregateRuneAmounts, getRunesUtxos } from "@/utils/runes";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -23,12 +23,12 @@ export async function POST(req: NextRequest) {
     const runesUtxos = await getRunesUtxos(data.wallet_details.ordinal_address);
     await dbConnect()
 
-    const existingUser = await UserCollection.findOne({
+    const existingUser = await Users.findOne({
       $or: [{ cardinal_address }, { ordinal_address }],
     });
 
     if (!existingUser) {
-      await UserCollection.create(dataToSave);
+      await Users.create(dataToSave);
       console.log("User data saved:", dataToSave);
     } else {
       console.log("User data already exists, not saving again.");
@@ -72,21 +72,39 @@ export async function POST(req: NextRequest) {
     });
 
     // console.log(allRuneUtxo);
-
+    
     for (const utxo of allRuneUtxo) {
-      const existingUtxo = await UtxoCollection.findOne({
+      if (utxo.runes.length === 0) {
+        console.log("UTXO has no runes, skipping save:", utxo);
+        continue;
+      }
+
+      const existingUtxo = await Utxos.findOne({
         txid: utxo.txid,
         vout: utxo.vout,
       });
 
       if (!existingUtxo) {
-        await UtxoCollection.create(utxo);
+        await Utxos.create(utxo);
         console.log("UTXO data saved:", utxo);
       } else {
         console.log("UTXO data already exists, not saving again.");
       }
     }
-    const updateResult = await UserCollection.updateMany(
+    // for (const utxo of allRuneUtxo) {
+    //   const existingUtxo = await Utxos.findOne({
+    //     txid: utxo.txid,
+    //     vout: utxo.vout,
+    //   });
+
+    //   if (!existingUtxo) {
+    //     await Utxos.create(utxo);
+    //     console.log("UTXO data saved:", utxo);
+    //   } else {
+    //     console.log("UTXO data already exists, not saving again.");
+    //   }
+    // }
+    const updateResult = await Users.updateMany(
       {},
       { $set: { runes: runesDataToSave } } 
     );

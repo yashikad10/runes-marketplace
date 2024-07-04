@@ -1,7 +1,7 @@
 import * as bitcoin from "bitcoinjs-lib";
 import secp256k1 from "@bitcoinerlab/secp256k1";
 import { AddressTxsUtxo, UTXO } from "@/types/runes";
-import { Utxo } from "@/models/UtxoCollection";
+import { Utxo } from "@/models/Utxos";
 // import { IInscription } from "@/types";
 import {
   doesUtxoContainInscription,
@@ -23,7 +23,7 @@ const ORDINALS_POSTAGE_VALUE = Number(1000);
 export const PLATFORM_FEE_ADDRESS =
   process.env.PLATFORM_FEE_ADDRESS ||
   "bc1qz9fuxrcrta2ut0ad76zlse09e98x9wrr7su7u6";
-const BUYING_PSBT_SELLER_SIGNATURE_INDEX = 2;
+const BUYING_PSBT_SELLER_SIGNATURE_INDEX = 1;
 
 interface Result {
   status: string;
@@ -255,75 +255,20 @@ async function generateUnsignedBuyingPSBTBase64(listing: any, wallet: string) {
   if (!listing.seller.ordItem.value) {
     throw Error("Inscription has no output value");
   }
-  // if (
-  //   listing.buyer.buyerDummyUTXOs?.length !== 2 ||
-  //   !listing.buyer.buyerPaymentUTXOs
-  // ) {
-  //   throw new Error("Buyer address has not enough utxos");
-  // }
+
   let totalInput = 0;
-  // Add two dummyUtxos
-  // for (const dummyUtxo of listing.buyer.buyerDummyUTXOs) {
-  //   const tx = bitcoin.Transaction.fromHex(await getTxHexById(dummyUtxo.txid));
-  //   for (const output in tx.outs) {
-  //     try {
-  //       tx.setWitness(parseInt(output), []);
-  //     } catch {}
-  //   }
-  //   const input: any = {
-  //     hash: dummyUtxo.txid,
-  //     index: dummyUtxo.vout,
-  //     ...(taprootAddress && {
-  //       nonWitnessUtxo: tx.toBuffer(),
-  //     }),
-  //   };
-  //   if (!taprootAddress) {
-  //     const redeemScript = bitcoin.payments.p2wpkh({
-  //       pubkey: Buffer.from(buyerPublicKey!, "hex"),
-  //     }).output;
-  //     const p2sh = bitcoin.payments.p2sh({
-  //       redeem: { output: redeemScript },
-  //     });
-  //     if (wallet !== "unisat") {
-  //       input.witnessUtxo = tx.outs[dummyUtxo.vout];
-  //       // input.witnessUtxo = {
-  //       //   script: p2sh.output,
-  //       //   value: dummyUtxo.value,
-  //       // } as WitnessUtxo;
-  //       if (!segwitAddress && (wallet === "xverse" || wallet === "magiceden"))
-  //         input.redeemScript = p2sh.redeem?.output;
-  //     } else {
-  //       // unisat wallet should not have redeemscript for buy tx
-  //       input.witnessUtxo = tx.outs[dummyUtxo.vout];
-  //     }
-  //   } else {
-  //     // unisat
-  //     input.witnessUtxo = tx.outs[dummyUtxo.vout];
-  //     input.tapInternalKey = toXOnly(
-  //       tx.toBuffer().constructor(buyerPublicKey, "hex")
-  //     );
-  //   }
-  //   psbt.addInput(input);
-  //   totalInput += dummyUtxo.value;
-  // }
-  // Add dummy output
-  // psbt.addOutput({
-  //   address: listing.buyer.buyerAddress,
-  //   value:
-  //     listing.buyer.buyerDummyUTXOs[0].value +
-  //     listing.buyer.buyerDummyUTXOs[1].value,
-  //   //+
-  //   // listing.seller.ordItem.output_value,
-  // });
-  // Add ordinal output
+
+  const { sellerInput, sellerOutput } = await getSellerInputAndOutput(listing);
+
   psbt.addOutput({
     address: listing.buyer.buyerTokenReceiveAddress,
     value: ORDINALS_POSTAGE_VALUE,
   });
   console.log({ address: listing.buyer.buyerTokenReceiveAddress });
-  const { sellerInput, sellerOutput } = await getSellerInputAndOutput(listing);
-  psbt.addInput(sellerInput);
-  psbt.addOutput(sellerOutput);
+
+  // const { sellerInput, sellerOutput } = await getSellerInputAndOutput(listing);
+  // psbt.addInput(sellerInput);
+  // psbt.addOutput(sellerOutput);
   console.log(sellerOutput, "seller output***");
   // Add payment utxo inputs
   for (const utxo of listing.buyer.buyerPaymentUTXOs) {
@@ -368,6 +313,10 @@ async function generateUnsignedBuyingPSBTBase64(listing: any, wallet: string) {
     psbt.addInput(input);
     totalInput += utxo.value;
   }
+
+  psbt.addInput(sellerInput);
+  psbt.addOutput(sellerOutput);
+
   // Create a platform fee output
   // let platformFeeValue = Math.floor((listing.seller.price * (0 + 100)) / 10000);
   // // Assuming listing.seller.price is in satoshis

@@ -5,7 +5,7 @@ import {
   verifySignature,
 } from "@/utils/marketplace/listing";
 import dbConnect from "@/lib/dbConnect";
-import UtxoCollection from "@/models/UtxoCollection";
+import Utxos from "@/models/Utxos";
 
 interface OrderInput {
   value: number;
@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
       }
       await dbConnect();
 
-      const runeUtxo = await UtxoCollection.findOne({
+      const runeUtxo = await Utxos.findOne({
         utxo_id: orderInput.utxo_id,
       });
 

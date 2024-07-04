@@ -4,9 +4,9 @@ import secp256k1 from "@bitcoinerlab/secp256k1";
 // import { getCache, setCache } from "@/lib/cache";
 import { getBTCPriceInDollars } from "@/utils";
 import { mergeSignedBuyingPSBTBase64 } from "@/utils/marketplace/buying";
-import UtxoCollection from "@/models/UtxoCollection";
-import UserCollection from "@/models/UserCollection";
 import { fromXOnly } from "@/utils/marketplace";
+import Utxos from "@/models/Utxos";
+import Users from "@/models/Users";
 
 export async function POST(
   req: NextRequest,
@@ -36,22 +36,22 @@ export async function POST(
     let parsedPsbt = bitcoin.Psbt.fromBase64(signed_psbt);
     let doc: any = null;
     if (
-      parsedPsbt.data.inputs.length >= 4 &&
-      parsedPsbt.data.inputs[2].nonWitnessUtxo
+      // parsedPsbt.data.inputs.length >= 4 &&
+      parsedPsbt.data.inputs[1].nonWitnessUtxo
     ) {
       let sellerPublicKey: string | null = null;
-      if (parsedPsbt.data.inputs[2].tapInternalKey)
-        sellerPublicKey = fromXOnly(parsedPsbt.data.inputs[2].tapInternalKey);
-      const inscriptionNWO = parsedPsbt.data.inputs[2].nonWitnessUtxo;
+      if (parsedPsbt.data.inputs[1].tapInternalKey)
+        sellerPublicKey = fromXOnly(parsedPsbt.data.inputs[1].tapInternalKey);
+      const inscriptionNWO = parsedPsbt.data.inputs[1].nonWitnessUtxo;
       const deserializedTx = bitcoin.Transaction.fromBuffer(inscriptionNWO);
       const txid = deserializedTx.getId();
       const outputs = deserializedTx.outs.map((item, idx) => {
         return `${txid}:${idx}`;
       });
       // Query the ListingModel
-      const listings = await UtxoCollection.find({
+      const listings = await Utxos.find({
         listed: true,
-        output: { $in: outputs },
+        utxo_id: { $in: outputs },
       });
       doc = listings[0];
       if (!doc)
@@ -62,6 +62,8 @@ export async function POST(
           },
           { status: 404 }
         );
+
+      console.log("merging....");
       const mergedPsbtBase64 = mergeSignedBuyingPSBTBase64(
         doc.signed_psbt,
         signed_psbt
@@ -103,13 +105,13 @@ export async function POST(
     }
     const txid = await broadcastRes.text();
     console.log(txid, "BROADCAST RESULT");
-    const user = await UserCollection.findOne({
+    const user = await Users.findOne({
       cardinal_address: user_address,
     });
     console.log({ user });
     if (txid) {
       if (doc) {
-        await UtxoCollection.findByIdAndUpdate(doc._id, {
+        await Utxos.findByIdAndUpdate(doc._id, {
           listed: true,
           in_mempool: true,
           txid,
@@ -138,13 +140,13 @@ export async function POST(
         //   });
         // }
       }
-    //   if (activity_tag === "prepare") {
-    //     createActivity({
-    //       type: "prepare",
-    //       user: user._id,
-    //       txid,
-    //     });
-    //   }
+      //   if (activity_tag === "prepare") {
+      //     createActivity({
+      //       type: "prepare",
+      //       user: user._id,
+      //       txid,
+      //     });
+      //   }
       return NextResponse.json({
         ok: true,
         message: "Transaction successfully broadcasted",
@@ -163,12 +165,3 @@ export async function POST(
     );
   }
 }
-
-
-
-
-
-
-
-
-

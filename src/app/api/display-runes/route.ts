@@ -1,5 +1,5 @@
 import dbConnect from "@/lib/dbConnect";
-import UserCollection from "@/models/UserCollection";
+import Users from "@/models/Users";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const user = await UserCollection.findOne({ ordinal_address });
+    const user = await Users.findOne({ ordinal_address });
     console.log(user, "-----------------user inside route display rune");
     if (!user) {
       return NextResponse.json(

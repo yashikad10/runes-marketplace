@@ -1,13 +1,13 @@
 
 import dbConnect from "@/lib/dbConnect";
-import UtxoCollection from "@/models/UtxoCollection";
+import Utxos from "@/models/Utxos";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
      await dbConnect();
 
-     const data= await UtxoCollection.find({listed: true})
+     const data= await Utxos.find({listed: true})
      .select("-signed_psbt -unsigned_psbt")
 
      console.log(data,"data*******")

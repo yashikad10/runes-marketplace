@@ -15,7 +15,7 @@ const Header = () => {
       <div className="container mx-auto flex justify-between items-center">
         <Link
           href="/"
-          className="text-2xl p-2 font-bold bg-gradient-to-r from-[#09243b] to-[#042d4e] text-transparent bg-clip-text text-center"
+          className="text-2xl p-2 font-bold bg-gradient-to-r from-[#d4e8f9] to-[#85c7fc] text-transparent bg-clip-text text-center"
         >
           Rune Marketplace
         </Link>

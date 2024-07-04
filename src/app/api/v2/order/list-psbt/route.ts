@@ -4,11 +4,11 @@ import {
   getTxHexById,
   toXOnly,
 } from "@/utils/marketplace/listing"
-import UtxoCollection, { Utxo } from "@/models/UtxoCollection";
 import dbConnect from "@/lib/dbConnect";
 import * as bitcoin from "bitcoinjs-lib";
 import secp256k1 from "@bitcoinerlab/secp256k1";
 import { testnet } from "bitcoinjs-lib/src/networks";
+import Utxos, { Utxo } from "@/models/Utxos";
 bitcoin.initEccLib(secp256k1);
 
 interface OrderInput {
@@ -46,7 +46,7 @@ async function processRuneItem(
   
   await dbConnect();
 
-  const runeItem: Utxo | null = await UtxoCollection.findOne({
+  const runeItem: Utxo | null = await Utxos.findOne({
     utxo_id,
   });
   console.log(runeItem, "runeItem");
@@ -127,7 +127,7 @@ export async function POST(
       );
     }
 
-    const utxoData = await UtxoCollection.findOne({ utxo_id: body.utxo_id });
+    const utxoData = await Utxos.findOne({ utxo_id: body.utxo_id });
     if (!utxoData) {
       return NextResponse.json(
         { ok: false, message: 'UTXO not found' },

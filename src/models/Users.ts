@@ -1,6 +1,6 @@
 import { Schema, model, models, Document } from "mongoose";
 
-export interface UserCollectionType extends Document {
+export interface UserType extends Document {
   wallet: string;
   cardinal_address: string;
   ordinal_address: string;
@@ -8,7 +8,7 @@ export interface UserCollectionType extends Document {
   runes: [];
 }
 
-const UserCollectionSchema = new Schema<UserCollectionType>({
+const UserSchema = new Schema<UserType>({
   wallet: {
     type: String,
     required: true,
@@ -33,5 +33,5 @@ const UserCollectionSchema = new Schema<UserCollectionType>({
   },
 });
 
-export default models.UserCollection ||
-  model<UserCollectionType>("UserCollection", UserCollectionSchema);
+export default models.User ||
+  model<UserType>("User", UserSchema);

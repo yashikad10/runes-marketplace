@@ -60,19 +60,6 @@ const RuneList = () => {
   ) => {
     console.log(utxo_id, "------------");
     try {
-      // const response = await axios.post("/api/v2/order/create-buy-psbt", {
-      //   utxo_id,
-      //   pay_address,
-      //   receive_address,
-      //   publickey,
-      //   fee_rate,
-      //   wallet,
-      //   price,
-      // });
-      // setBuyPsbtData(response.data);
-      // setUnsignedPsbtBase64(response.data.unsigned_psbt_base64);
-
-      // console.log(response.data, "create-buy-psbt data");
       const response = await getCreateBuyPsbt(
         utxo_id,
         pay_address,
@@ -82,7 +69,7 @@ const RuneList = () => {
         wallet,
         price
       );
-      
+
       if (response?.data) {
         setBuyPsbtData(response.data);
         setUnsignedPsbtBase64(response.data?.result?.unsigned_psbt_base64);
@@ -108,7 +95,7 @@ const RuneList = () => {
       return;
     }
     let inputs = [];
-    
+
     if (action === "dummy") {
       inputs.push({
         address: walletDetails.cardinal_address,
@@ -118,11 +105,11 @@ const RuneList = () => {
       });
     } else if (action === "buy") {
       new Array(inputLength).fill(1).map((item: number, idx: number) => {
-        if (idx !== 2)
+        if (idx !== 1)
           inputs.push({
             address: walletDetails.cardinal_address,
             publickey: walletDetails.cardinal_pubkey,
-            sighash: 131,
+            sighash: 1,
             index: [idx],
           });
       });
@@ -138,7 +125,7 @@ const RuneList = () => {
   }, [action, unsignedPsbtBase64]);
 
   useEffect(() => {
-    console.log(unsignedPsbtBase64,"unsigned psbt")
+    console.log(unsignedPsbtBase64, "unsigned psbt");
     if (unsignedPsbtBase64) {
       signTx();
     }
@@ -146,14 +133,15 @@ const RuneList = () => {
 
   const broadcast = async (signedPsbt: string) => {
     const rune = { ...buyPsbtData };
-    console.log(rune,"rune****")
-  
+    console.log(rune, "rune****");
+
     try {
       const { data } = await axios.post("/api/v2/order/broadcast", {
         signed_psbt: signedPsbt,
         activity_tag: action === "dummy" ? "prepare" : "buy",
         user_address: walletDetails?.cardinal_address,
       });
+
       setLoading(false);
       dispatch(setNewActivity(true));
       // Track successful broadcast
@@ -283,28 +271,25 @@ const RuneList = () => {
             </div>
             <div className="text-sm mb-1">
               Rune Amount:{" "}
-              {convertSatoshiToBTC(item.runes[0].amount) /
-                Math.pow(10, item.runes[0].divisibility)}{" "}
-              BTC
+              {item.runes[0].amount / Math.pow(10, item.runes[0].divisibility)}{" "}
             </div>
             <div className="flex justify-end">
-                <button
-                  onClick={() =>
-                    handleBuyNowClick(
-                      item.utxo_id,
-                      walletDetails?.cardinal_address || "",
-                      walletDetails?.ordinal_address || "",
-                      walletDetails?.cardinal_pubkey || "",
-                      20,
-                      walletDetails?.wallet || "",
-                      item.listed_price
-                    )
-                  }
-                  className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2 mt-4"
-                >
-                  Buy Now
-                </button>
-              
+              <button
+                onClick={() =>
+                  handleBuyNowClick(
+                    item.utxo_id,
+                    walletDetails?.cardinal_address || "",
+                    walletDetails?.ordinal_address || "",
+                    walletDetails?.cardinal_pubkey || "",
+                    20,
+                    walletDetails?.wallet || "",
+                    item.listed_price
+                  )
+                }
+                className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2 mt-4"
+              >
+                Buy Now
+              </button>
             </div>
           </div>
         ))}

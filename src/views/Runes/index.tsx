@@ -163,11 +163,11 @@ const Runes = ({ rune }: any) => {
   };
   console.log({ psbtData });
 
-  console.log(expandedRuneDetails,"expandedRuneDetails**")
+  console.log(expandedRuneDetails, "expandedRuneDetails**");
   return (
     <div className="">
       {expandedRuneDetails?.map((runeDetail: any, detailIndex: number) => (
-        <div key={detailIndex} className="bg-[#031524] p-2 text-white w-full">
+        <div key={detailIndex} className="bg-[#205681] p-2 text-white w-full">
           {runeDetail.runes?.map((item: any, index: number) => (
             <div
               key={index}
@@ -185,7 +185,7 @@ const Runes = ({ rune }: any) => {
                 <p className="font-semibold text-gray-400">Input:</p>
                 <input
                   type="text"
-                  className="border border-gray-900 bg-transparent rounded outline-none px-3 text-white w-full"
+                  className="border border-white bg-transparent rounded outline-none px-3 text-white w-full"
                   onChange={(e) =>
                     handleInputChange(
                       runeDetail.utxo_id,
@@ -229,34 +229,31 @@ const Runes = ({ rune }: any) => {
               <div className="px-6 py-4 whitespace-nowrap flex-1 flex justify-end">
                 {!unsignedPsbtBase64[runeDetail.utxo_id] ||
                 psbtData?.utxo_id != runeDetail?.utxo_id ? (
-                 <div className="">
-                  {/* {console.log({runeDetail})} */}
-                  {!runeDetail.listed ? (
-                    <button
-                    onClick={() =>
-                      handleListNowClick(
-                        runeDetail.utxo_id,
-                        runeDetail.ordinal_address,
-                        item.amount,
-                        item.divisibility,
-                        walletDetails?.ordinal_pubkey || "",
-                        walletDetails?.wallet || "",
-                        10
-                      )
-                    }
-                    className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2"
-                  >
-                    List now
-                  </button>
-                  ) : ( 
-                    <button
-                 
-                    className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2"
-                  >
-                    Listed
-                  </button>
-                  )}
-                 </div>
+                  <div className="">
+                    {/* {console.log({runeDetail})} */}
+                    {!runeDetail.listed ? (
+                      <button
+                        onClick={() =>
+                          handleListNowClick(
+                            runeDetail.utxo_id,
+                            runeDetail.ordinal_address,
+                            item.amount,
+                            item.divisibility,
+                            walletDetails?.ordinal_pubkey || "",
+                            walletDetails?.wallet || "",
+                            10
+                          )
+                        }
+                        className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2"
+                      >
+                        List now
+                      </button>
+                    ) : (
+                      <button className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2">
+                        Listed
+                      </button>
+                    )}
+                  </div>
                 ) : (
                   <button
                     onClick={() => signTx(runeDetail.utxo_id)}
@@ -291,9 +288,8 @@ const Runes = ({ rune }: any) => {
 
 export default Runes;
 
-
-
-{/* <button
+{
+  /* <button
 onClick={() =>
   handleListNowClick(
     runeDetail.utxo_id,
@@ -308,4 +304,5 @@ onClick={() =>
 className="bg-gradient-to-r from-[#2C74B3] to-[#205295] text-white font-semibold rounded-md px-4 py-2"
 >
 {expandedRuneDetails.Listed === true ? "List" : "listed"}
-</button> */}
+</button> */
+}
