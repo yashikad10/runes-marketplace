@@ -167,25 +167,25 @@ const Runes = ({ rune }: any) => {
   return (
     <div className="">
       {expandedRuneDetails?.map((runeDetail: any, detailIndex: number) => (
-        <div key={detailIndex} className="bg-[#205681] p-2 text-white w-full">
+        <div key={detailIndex} className="bg-[#2C74B3] p-2 text-white w-full border-b border-gray-800">
           {runeDetail.runes?.map((item: any, index: number) => (
             <div
               key={index}
-              className="text-gray-100 flex flex-wrap items-center text-sm"
+              className="text-white flex flex-wrap items-center text-sm"
             >
               <div className="px-4 py-4 whitespace-nowrap flex-1">
-                <p className="font-semibold text-gray-400">Name:</p>
+                <p className="font-semibold text-gray-300">Name:</p>
                 <p>{item.name}</p>
               </div>
               <div className="px-6 py-4 whitespace-nowrap flex-1">
-                <p className="font-semibold text-gray-400">Amount:</p>
+                <p className="font-semibold text-gray-300">Amount:</p>
                 <p>{item.amount / Math.pow(10, item.divisibility)}</p>
               </div>
               <div className="px-6 py-4 whitespace-nowrap flex-1">
-                <p className="font-semibold text-gray-400">Input:</p>
+                <p className="font-semibold text-gray-300">Input:</p>
                 <input
                   type="text"
-                  className="border border-white bg-transparent rounded outline-none px-3 text-white w-full"
+                  className="border border-gray-700 bg-transparent rounded outline-none px-3 text-white w-full"
                   onChange={(e) =>
                     handleInputChange(
                       runeDetail.utxo_id,
@@ -197,7 +197,7 @@ const Runes = ({ rune }: any) => {
                 />
               </div>
               <div className="px-6 py-4 whitespace-nowrap flex-1">
-                <p className="font-semibold text-gray-400">Product (in BTC):</p>
+                <p className="font-semibold text-gray-300">Product (in BTC):</p>
                 <p>
                   {calculateProduct(
                     convertToSats(
@@ -211,7 +211,7 @@ const Runes = ({ rune }: any) => {
                 </p>
               </div>
               <div className="px-6 py-4 whitespace-nowrap flex-1">
-                <p className="font-semibold text-gray-400">Dollar Value:</p>
+                <p className="font-semibold text-gray-300">Dollar Value:</p>
                 <p>
                   $
                   {calculateDollarValue(

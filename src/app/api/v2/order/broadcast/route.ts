@@ -112,41 +112,14 @@ export async function POST(
     if (txid) {
       if (doc) {
         await Utxos.findByIdAndUpdate(doc._id, {
-          listed: true,
-          in_mempool: true,
+          listed: false,
+          // in_mempool: true,
           txid,
         });
         let btcPrice = 0;
-        // const btc_cache_key = "bitcoinPrice";
-        // const cache = await getCache(btc_cache_key);
-        // if (cache) btcPrice = cache;
-        // else {
-        //   btcPrice = (await getBTCPriceInDollars()) || 0;
-        //   await setCache(btc_cache_key, btcPrice, 120);
-        // }
-        // console.log({ btcPrice });
-        // if (user) {
-        //   console.log("creating activity");
-        //   createActivity({
-        //     inscription_id: doc.inscription_id,
-        //     inscription: doc._id,
-        //     type: "buy",
-        //     user: user._id,
-        //     seller: doc.address,
-        //     buyer: user_address,
-        //     price_usd: (doc.listed_price / 100_000_000) * btcPrice,
-        //     price_sat: doc.listed_price,
-        //     txid,
-        //   });
-        // }
+        
       }
-      //   if (activity_tag === "prepare") {
-      //     createActivity({
-      //       type: "prepare",
-      //       user: user._id,
-      //       txid,
-      //     });
-      //   }
+      
       return NextResponse.json({
         ok: true,
         message: "Transaction successfully broadcasted",

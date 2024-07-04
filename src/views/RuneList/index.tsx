@@ -71,6 +71,8 @@ const RuneList = () => {
       );
 
       if (response?.data) {
+        setAction("buy")
+        setInputLength(response.data.result.input_length)
         setBuyPsbtData(response.data);
         setUnsignedPsbtBase64(response.data?.result?.unsigned_psbt_base64);
         console.log(response.data, "create-buy-psbt data");
@@ -95,7 +97,7 @@ const RuneList = () => {
       return;
     }
     let inputs = [];
-
+console.log({action})
     if (action === "dummy") {
       inputs.push({
         address: walletDetails.cardinal_address,

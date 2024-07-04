@@ -57,7 +57,7 @@ const RunesData = () => {
       <h4 className="text-2xl font-semibold ml-2 mb-8 text-white">
         Collection
       </h4>
-      <ul className="space-y-2 border border-[#28475C] rounded-md ">
+      <ul className="space-y-2 border border-[#28475C] bg-black rounded-md ">
         {runesData?.runes.map((rune, index) => (
           <li
             key={index}
