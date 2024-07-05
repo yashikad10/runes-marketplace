@@ -3,7 +3,7 @@ import {
   getSellerOrdOutputValue,
   getTxHexById,
   toXOnly,
-} from "@/utils/marketplace/listing"
+} from "@/utils/marketplace/listing";
 import dbConnect from "@/lib/dbConnect";
 import * as bitcoin from "bitcoinjs-lib";
 import secp256k1 from "@bitcoinerlab/secp256k1";
@@ -37,24 +37,28 @@ function validateRequest(req: NextRequest, body: OrderInput): string[] {
 async function processRuneItem(
   utxo_id: string,
   ordinal_address: string,
-  price: number, //in sats   
+  price: number, //in sats
   publickey: string,
   wallet: string,
   maker_fee_bp?: number
 ) {
-  let psbt = new bitcoin.Psbt({ network: (process.env.NEXT_PUBLIC_NETWORK ?testnet: undefined) });
-  
+  let psbt = new bitcoin.Psbt({
+    network: process.env.NEXT_PUBLIC_NETWORK ? testnet : undefined,
+  });
+
   await dbConnect();
 
   const runeItem: Utxo | null = await Utxos.findOne({
     utxo_id,
   });
   console.log(runeItem, "runeItem");
-  
+
   if (!runeItem) throw new Error("Item hasn't been added to our DB");
-  
+
   const taprootAddress =
-    runeItem && runeItem?.ordinal_address && runeItem?.ordinal_address.startsWith("tb1p");
+    runeItem &&
+    runeItem?.ordinal_address &&
+    runeItem?.ordinal_address.startsWith("tb1p");
   if (runeItem.ordinal_address && runeItem.utxo_id && runeItem.value) {
     const [ordinalUtxoTxId, ordinalUtxoVout] = runeItem.utxo_id.split(":");
     // Define the input for the PSBT
@@ -80,7 +84,11 @@ async function processRuneItem(
         tx.toBuffer().constructor(publickey, "hex")
       );
     }
-    console.log({ tapInternalKey: input.tapInternalKey, publickey, runeItemvalue: runeItem.value });
+    console.log({
+      tapInternalKey: input.tapInternalKey,
+      publickey,
+      runeItemvalue: runeItem.value,
+    });
 
     psbt.addInput(input);
     psbt.addOutput({
@@ -115,7 +123,7 @@ export async function POST(
   console.log("***** CREATE UNSIGNED PSBT API CALLED *****");
   try {
     const body: OrderInput = await req.json();
-    console.log(body,"Req body")
+    console.log(body, "Req body");
     const missingFields = validateRequest(req, body);
     if (missingFields.length > 0) {
       return NextResponse.json(
@@ -130,11 +138,11 @@ export async function POST(
     const utxoData = await Utxos.findOne({ utxo_id: body.utxo_id });
     if (!utxoData) {
       return NextResponse.json(
-        { ok: false, message: 'UTXO not found' },
+        { ok: false, message: "UTXO not found" },
         { status: 404 }
       );
     }
-    console.log(utxoData,"utxoData")
+    console.log(utxoData, "utxoData");
 
     const { unsignedPsbtBase64, tap_internal_key } = await processRuneItem(
       body.utxo_id,
@@ -146,12 +154,13 @@ export async function POST(
     );
     return NextResponse.json({
       ok: true,
-    result:{  utxo_id: body.utxo_id,
-      price: Math.floor(body.price),
-      receive_address: body.receive_address,
-      unsigned_psbt_base64: unsignedPsbtBase64,
-      tap_internal_key,
-      }
+      result: {
+        utxo_id: body.utxo_id,
+        price: Math.floor(body.price),
+        receive_address: body.receive_address,
+        unsigned_psbt_base64: unsignedPsbtBase64,
+        tap_internal_key,
+      },
     });
   } catch (error: any) {
     console.log(error, "error");
@@ -163,4 +172,3 @@ export async function POST(
   }
 }
 export const dynamic = "force-dynamic";
-

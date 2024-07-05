@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/stores";
-import { convertSatoshiToBTC, convertSatoshiToUSD } from "@/utils";
+import { convertSatoshiToBTC, convertSatoshiToUSD, getMaxFeeRate } from "@/utils";
 import axios from "axios";
 import { useSignTx, useWalletAddress } from "bitcoin-wallet-adapter";
 import { RuneItem } from "@/types";
@@ -22,31 +22,43 @@ const RuneList = () => {
   const [buyPsbtData, setBuyPsbtData] = useState<any>();
   const [action, setAction] = useState<string>("");
   const [unsignedPsbtBase64, setUnsignedPsbtBase64] = useState<string>("");
+  const [feeRate, setFeeRate] = useState(0);
 
   const btcPrice = useSelector((state: RootState) => state.general.btc_price);
   const walletDetails = useWalletAddress();
 
-  console.log(list, "list*****");
+  // console.log(list, "list*****");
 
   const runeList = async () => {
     try {
       const res = await getRunesList();
       const dataArray = res?.data?.data;
 
+      
       // Check if dataArray is defined and is an array
       if (Array.isArray(dataArray)) {
         setList(dataArray);
       } else {
         console.error("Data is not an array or is undefined");
       }
+
+      // const fee_rate=await getMaxFeeRate();
+      // console.log(fee_rate, "fee rate ***")
+
       // setList(res?.data.data)
       console.log(res, "res-----");
     } catch (error) {}
   };
-  console.log(list?.[0]?.utxo_id, "-list");
+  // console.log(list?.[0]?.utxo_id, "-list");
 
   useEffect(() => {
     runeList();
+    const fetchFeeRate = async () => {
+      const feeRate = await getMaxFeeRate();
+      setFeeRate(feeRate);
+      console.log(feeRate, "fee rate ***");
+    };
+    fetchFeeRate();
   }, []);
 
   const handleBuyNowClick = async (
@@ -54,7 +66,7 @@ const RuneList = () => {
     pay_address: string,
     receive_address: string,
     publickey: string,
-    fee_rate: number,
+    // fee_rate: number,
     wallet: string,
     price: number
   ) => {
@@ -65,14 +77,14 @@ const RuneList = () => {
         pay_address,
         receive_address,
         publickey,
-        fee_rate,
+        feeRate+10,
         wallet,
         price
       );
 
       if (response?.data) {
-        setAction("buy")
-        setInputLength(response.data.result.input_length)
+        setAction("buy");
+        setInputLength(response.data.result.input_length);
         setBuyPsbtData(response.data);
         setUnsignedPsbtBase64(response.data?.result?.unsigned_psbt_base64);
         console.log(response.data, "create-buy-psbt data");
@@ -97,7 +109,7 @@ const RuneList = () => {
       return;
     }
     let inputs = [];
-console.log({action})
+    console.log({ action });
     if (action === "dummy") {
       inputs.push({
         address: walletDetails.cardinal_address,
@@ -283,7 +295,7 @@ console.log({action})
                     walletDetails?.cardinal_address || "",
                     walletDetails?.ordinal_address || "",
                     walletDetails?.cardinal_pubkey || "",
-                    20,
+                    // 20,
                     walletDetails?.wallet || "",
                     item.listed_price
                   )

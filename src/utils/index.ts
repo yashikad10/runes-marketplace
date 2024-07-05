@@ -154,3 +154,21 @@ export async function fetchLatestUtxoData(utxo_id: string): Promise<any> {
     throw new Error(`Failed to fetch data: ${error.response.data}`);
   }
 }
+
+const mempoolNetwork = () =>
+  process.env.NEXT_PUBLIC_NETWORK === "mainnet" ? "" : "testnet/";
+
+export const getMaxFeeRate = async () => {
+  try {
+    const { data } = await axios.get(
+      `https://mempool.space/${mempoolNetwork()}api/v1/fees/recommended`
+    );
+    if ("fastestFee" in data) {
+      return data.fastestFee;
+    }
+    throw new Error("fastestFee not found in response data");
+  } catch (error) {
+    console.error(error);
+    return "error -- site down or data format changed";
+  }
+};

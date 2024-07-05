@@ -271,6 +271,9 @@ async function generateUnsignedBuyingPSBTBase64(listing: any, wallet: string) {
   // psbt.addOutput(sellerOutput);
   console.log(sellerOutput, "seller output***");
   // Add payment utxo inputs
+
+  const latestBuyerInput=[];
+
   for (const utxo of listing.buyer.buyerPaymentUTXOs) {
     const tx = bitcoin.Transaction.fromHex(await getTxHexById(utxo.txid));
     for (const output in tx.outs) {
@@ -310,13 +313,22 @@ async function generateUnsignedBuyingPSBTBase64(listing: any, wallet: string) {
         tx.toBuffer().constructor(listing.buyer.buyerPublicKey, "hex")
       );
     }
-    psbt.addInput(input);
+    if(!totalInput){
+      psbt.addInput(input);
+    }else{
+      latestBuyerInput.push(input)
+    }
     totalInput += utxo.value;
   }
 
   psbt.addInput(sellerInput);
   psbt.addOutput(sellerOutput);
 
+  if(latestBuyerInput.length>0){
+    for(const input of latestBuyerInput){
+      psbt.addInput(input)
+    }
+  }
   // Create a platform fee output
   // let platformFeeValue = Math.floor((listing.seller.price * (0 + 100)) / 10000);
   // // Assuming listing.seller.price is in satoshis

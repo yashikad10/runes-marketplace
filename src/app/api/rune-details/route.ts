@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(users, { status: 200 });
   } catch (err) {
-    console.error("Error in GET request handler:", err);
+    console.error("Error in GET request handler:");
     return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
